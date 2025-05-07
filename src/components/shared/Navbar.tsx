@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import { Button } from '@/components/ui/button';
 import { TicketIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -12,7 +12,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
           <TicketIcon className="h-8 w-8" />
-          <span>{t('title')}</span>
+          <span className="text-foreground">{t('title')}</span>
         </Link>
         <nav className="flex items-center gap-2 sm:gap-4">
           <Button variant="ghost" asChild>
