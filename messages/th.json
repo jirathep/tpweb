@@ -9,8 +9,8 @@
     "searchPlaceholder": "ค้นหา..."
   },
   "Footer": {
-    "copyright": "© {year} พร้อมท์ อีทิกเก็ต สงวนลิขสิทธิ์",
-    "companyTitle": "พร้อมท์ อีทิกเก็ต",
+    "copyright": "© {year} 411เอ็นเตอร์เทนเม้นท์ สงวนลิขสิทธิ์",
+    "companyTitle": "411เอ็นเตอร์เทนเม้นท์",
     "aboutUs": "เกี่ยวกับเรา",
     "privacyPolicy": "นโยบายความเป็นส่วนตัว",
     "termsOfService": "เงื่อนไขการให้บริการ",
@@ -81,7 +81,7 @@
     "noEventsFoundDescription": "ลองปรับเปลี่ยนตัวกรองของคุณ หรือกลับมาตรวจสอบอีกครั้ง",
     "viewDetails": "ดูรายละเอียด",
     "unnamedLocation": "สถานที่ไม่มีชื่อ",
-    "uncategorized": "ไม่มีหมวดหมู่",
+    "uncategorized": "อื่นๆ",
     "atTime": "เวลา {time}",
     "DatePicker": {
       "placeholder": "เลือกวันที่"

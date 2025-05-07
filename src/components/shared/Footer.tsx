@@ -2,7 +2,7 @@
 'use client';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
-import { TicketIcon, Facebook, Instagram, Twitter, Youtube, MessageCircle } from 'lucide-react'; // Added MessageCircle as a stand-in for Line
+import { Facebook, Instagram, Twitter } from 'lucide-react'; 
 
 // Placeholder for Line icon as it's not in Lucide. 
 // A more accurate SVG or component would be used in a real scenario.
@@ -32,7 +32,7 @@ export default function Footer() {
       title: t('servicesTitle'),
       links: [
         { label: t('allEvents'), href: '/events' },
-        { label: t('news'), href: '#' }, // Assuming a future news page
+        { label: t('news'), href: '#' }, 
         { label: t('application'), href: '#' },
       ],
     },
@@ -62,9 +62,7 @@ export default function Footer() {
           {/* Column 1: Company Info & Social */}
           <div className="lg:col-span-2">
             <div className="flex items-center mb-4">
-              {/* Placeholder for Logo if available, otherwise just company name */}
-              {/* <TicketIcon className="h-8 w-8 mr-2 text-primary" />  */}
-              <span className="text-xl font-bold text-foreground">PROMPT ETICKET Co., Ltd.</span>
+              <span className="text-xl font-bold text-foreground">411ENTERTAINMENT Co., Ltd.</span>
             </div>
             <p className="text-muted-foreground mb-1">{t('addressLine1')}</p>
             <p className="text-muted-foreground mb-1">{t('addressLine2')}</p>
