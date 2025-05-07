@@ -39,7 +39,11 @@
     "noEventsFoundDescription": "ลองปรับเปลี่ยนตัวกรองของคุณ หรือกลับมาตรวจสอบอีกครั้ง",
     "viewDetails": "ดูรายละเอียด",
     "unnamedLocation": "สถานที่ไม่มีชื่อ",
-    "uncategorized": "ไม่มีหมวดหมู่"
+    "uncategorized": "ไม่มีหมวดหมู่",
+    "atTime": "เวลา {time}",
+    "DatePicker": {
+      "placeholder": "เลือกวันที่"
+    }
   },
   "EventDetailPage": {
     "backButton": "กลับ",
@@ -54,7 +58,8 @@
     "proceedToSeatsButton": "ดำเนินการต่อเพื่อเลือกที่นั่ง",
     "eventNotFoundTitle": "ไม่พบกิจกรรม",
     "eventNotFoundDescription": "ไม่พบกิจกรรมที่คุณกำลังมองหา หรืออาจถูกลบไปแล้ว",
-    "backToEventsButton": "กลับไปที่หน้ากิจกรรม"
+    "backToEventsButton": "กลับไปที่หน้ากิจกรรม",
+    "atTime": "เวลา {time}"
   },
   "SelectSeatsPage": {
     "backButton": "กลับไปที่รายละเอียดกิจกรรม",
@@ -160,5 +165,10 @@
   },
   "DatePicker": {
     "placeholder": "เลือกวันที่"
+  },
+  "NotFoundPage": {
+    "title": "ไม่พบหน้า",
+    "description": "ขออภัย! ไม่พบหน้าที่คุณกำลังมองหา อาจถูกย้ายหรือลบไปแล้ว",
+    "goHome": "ไปที่หน้าแรก"
   }
 }

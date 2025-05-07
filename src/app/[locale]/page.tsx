@@ -25,15 +25,17 @@ export default async function HomePage() {
       {highlightEvent && (
         <section className="relative rounded-lg overflow-hidden shadow-2xl">
           <Link href={`/events/${highlightEvent.id}`} className="block group cursor-pointer">
-            <Image
-              src={highlightEvent.bannerUrl || highlightEvent.imageUrl}
-              alt={highlightEvent.name}
-              width={1600}
-              height={600}
-              className="w-full h-[400px] md:h-[500px] object-cover"
-              priority
-              data-ai-hint="event banner"
-            />
+            <div className="relative w-full h-[400px] md:h-[500px]">
+              <Image
+                src={highlightEvent.bannerUrl || highlightEvent.imageUrl}
+                alt={highlightEvent.name}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1600px"
+                className="object-cover"
+                priority
+                data-ai-hint="event banner"
+              />
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:bg-black/50 transition-colors duration-300"></div>
             <div className="absolute bottom-0 left-0 p-6 md:p-10 text-white">
               <h1 className="text-3xl md:text-5xl font-bold mb-2 drop-shadow-lg">{highlightEvent.name}</h1>
@@ -65,8 +67,9 @@ export default async function HomePage() {
                     <Image
                       src={event.imageUrl}
                       alt={event.name}
-                      layout="fill"
-                      objectFit="cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
                       data-ai-hint={`${event.eventType} event`}
                     />
                   </div>
@@ -108,8 +111,9 @@ export default async function HomePage() {
                    <Image
                     src={article.imageUrl}
                     alt={article.title}
-                    layout="fill"
-                    objectFit="cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
                     data-ai-hint="news article"
                   />
                 </div>

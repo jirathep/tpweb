@@ -3,7 +3,7 @@
 
 import type { ChangeEvent } from 'react';
 import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
+import { Link } from '@/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -212,8 +212,9 @@ export default function EventListingPage() {
                     <Image
                       src={event.imageUrl}
                       alt={event.name}
-                      layout="fill"
-                      objectFit="cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
                        data-ai-hint={`${event.eventType} event poster`}
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
@@ -253,24 +254,4 @@ export default function EventListingPage() {
       </section>
     </div>
   );
-}
-
-// Helper to add "at" time, could be more sophisticated based on language rules
-const messages = {
-  en: {
-    EventListingPage: {
-      atTime: "at {time}"
-    }
-  },
-  th: {
-    EventListingPage: {
-      atTime: "เวลา {time}"
-    }
-  }
-};
-
-declare global {
-  interface IntlMessages {
-    EventListingPage: typeof messages.en.EventListingPage;
-  }
 }

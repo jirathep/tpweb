@@ -55,14 +55,14 @@ export default function RootLayout({
 
   return (
     <html lang={locale} className={cn(
-      GeistSans.variable, // Use imported GeistSans object directly
-      GeistMono.variable, // Use imported GeistMono object directly
-      sarabun.variable,   // This is the instance from calling Sarabun(...)
-      locale === 'th' ? sarabun.className : GeistSans.className, // Use Sarabun instance or imported GeistSans object
+      GeistSans.variable, 
+      GeistMono.variable, 
+      sarabun.variable,   
+      locale === 'th' ? sarabun.className : GeistSans.className, 
       'dark', 
       'antialiased'
       )}
-      suppressHydrationWarning // Recommended for next-themes / dark mode
+      suppressHydrationWarning 
       >
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>

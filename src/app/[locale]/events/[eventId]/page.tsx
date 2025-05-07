@@ -129,8 +129,9 @@ export default function EventDetailPage() {
           <Image
             src={event.imageUrl}
             alt={event.name}
-            layout="fill"
-            objectFit="cover"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
             priority
             data-ai-hint={`${event.eventType} banner`}
           />
@@ -221,21 +222,24 @@ export default function EventDetailPage() {
 //   "atTime": "เวลา {time}" // For Thai
 // }
 
-const messages = {
-  en: {
-    EventDetailPage: {
-      atTime: "at {time}"
-    }
-  },
-  th: {
-    EventDetailPage: {
-      atTime: "เวลา {time}"
-    }
-  }
-};
+// This is already declared in a global way by adding to interface IntlMessages
+// in the initial EventDetailPage. No need to redefine here.
+// const messages = {
+//   en: {
+//     EventDetailPage: {
+//       atTime: "at {time}"
+//     }
+//   },
+//   th: {
+//     EventDetailPage: {
+//       atTime: "เวลา {time}"
+//     }
+//   }
+// };
 
-declare global {
-  interface IntlMessages {
-    EventDetailPage: typeof messages.en.EventDetailPage;
-  }
-}
+// declare global {
+//   interface IntlMessages {
+//     EventDetailPage: typeof messages.en.EventDetailPage;
+//   }
+// }
+```

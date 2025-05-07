@@ -39,7 +39,11 @@
     "noEventsFoundDescription": "Try adjusting your filters or check back later.",
     "viewDetails": "View Details",
     "unnamedLocation": "Unnamed Location",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "atTime": "at {time}",
+    "DatePicker": {
+      "placeholder": "Pick a date"
+    }
   },
   "EventDetailPage": {
     "backButton": "Back",
@@ -54,7 +58,8 @@
     "proceedToSeatsButton": "Proceed to Select Seats",
     "eventNotFoundTitle": "Event not found",
     "eventNotFoundDescription": "The event you are looking for does not exist or may have been removed.",
-    "backToEventsButton": "Back to Events"
+    "backToEventsButton": "Back to Events",
+    "atTime": "at {time}"
   },
   "SelectSeatsPage": {
     "backButton": "Back to Event Details",
@@ -160,5 +165,10 @@
   },
   "DatePicker": {
     "placeholder": "Pick a date"
+  },
+  "NotFoundPage": {
+    "title": "Page Not Found",
+    "description": "Oops! The page you are looking for does not exist. It might have been moved or deleted.",
+    "goHome": "Go to Homepage"
   }
 }
