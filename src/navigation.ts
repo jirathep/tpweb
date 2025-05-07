@@ -16,6 +16,7 @@ export const pathnames = {
   '/events/[eventId]/summary': '/events/[eventId]/summary',
   '/events/[eventId]/ticket': '/events/[eventId]/ticket',
   '/login': '/login',
+  '/signup': '/signup',
 
   // Example with locale-specific pathnames
   // If you need to translate paths, you can

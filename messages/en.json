@@ -4,7 +4,8 @@
     "title": "Prompt eTicket",
     "home": "Home",
     "events": "Events",
-    "login": "Login"
+    "login": "Login",
+    "signup": "Sign Up"
   },
   "Footer": {
     "copyright": "© {year} Prompt eTicket. All rights reserved."

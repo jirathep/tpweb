@@ -20,6 +20,9 @@ export default function Navbar() {
           <Button variant="ghost" asChild>
             <Link href="/events">{t('events')}</Link>
           </Button>
+          <Button variant="ghost" asChild className="text-primary hover:text-primary/90">
+            <Link href="/signup">{t('signup')}</Link>
+          </Button>
           <Button variant="default" asChild>
             <Link href="/login">{t('login')}</Link>
           </Button>
