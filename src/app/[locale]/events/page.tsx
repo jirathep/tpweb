@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { ChangeEvent } from 'react';
@@ -6,10 +5,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from '@/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle as they are not used here for individual event cards
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, ArrowRight, FilterIcon, XIcon, Loader2, Ticket } from 'lucide-react';
+import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, FilterIcon, XIcon, Loader2, Ticket } from 'lucide-react';
 import type { Event, EventCategory } from '@/lib/types';
 import { getEvents } from '@/services/event';
 import { DatePicker } from '@/components/ui/date-picker'; 
@@ -56,7 +55,6 @@ export default function EventListingPage() {
     return Array.from(locations).filter(loc => loc.trim() !== '');
   }, [allEvents, t]);
 
-  // Use EVENT_CATEGORIES_FOR_FILTER for the select dropdown
   const eventTypesForFilter = useMemo(() => {
     return EVENT_CATEGORIES_FOR_FILTER;
   }, []);
@@ -115,6 +113,7 @@ export default function EventListingPage() {
     
     const formatDate = (dateStr: string) => {
       try {
+        // Format as DD.MM.YYYY as shown in the image
         return formatDateFns(parseISO(dateStr), 'dd.MM.yyyy', { locale: getDateLocale() });
       } catch {
         return dateStr;
@@ -124,17 +123,22 @@ export default function EventListingPage() {
     const sortedDates = [...event.dates].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     if (sortedDates.length === 1) {
-      return `${formatDate(sortedDates[0].date)} ${t('atTime', { time: sortedDates[0].time})}`;
+      // If only one date, check if a time is relevant to display or just the date.
+      // For card list, usually just date or date range is enough.
+      // The image shows date or date range, not time for list items.
+      return `${formatDate(sortedDates[0].date)}`;
     }
     
     const firstDate = formatDate(sortedDates[0].date);
     const lastDate = formatDate(sortedDates[sortedDates.length - 1].date);
     
     if (firstDate === lastDate) {
-        return `${firstDate} ${t('atTime', { time: sortedDates[0].time})}`; // Show first time if multiple on same day
+        // Multiple times on the same day, just show the date
+        return firstDate;
     }
 
-    return tHome('eventDateRange', { startDate: firstDate, endDate: lastDate });
+    // Use a simple hyphen for date range as in image.
+    return `${firstDate} - ${lastDate}`;
   };
   
   const getCategoryKeyForTranslation = (category: EventCategory) => {
@@ -144,8 +148,8 @@ export default function EventListingPage() {
       case 'Performance': return 'performancesTab';
       case 'Sport': return 'sportsTab';
       case 'Exhibition': return 'exhibitionsTab';
-      case 'Conference': return 'performancesTab'; // Assuming Conference maps to a general performance/show tab
-      case 'Other': return 'uncategorized'; // Or a specific "Other" translation if available
+      case 'Conference': return 'performancesTab'; 
+      case 'Other': return 'uncategorized'; 
       default: return 'allTypes';
     }
   };
@@ -166,18 +170,23 @@ export default function EventListingPage() {
                 placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 bg-background text-foreground"
+                className="pl-10 bg-input text-foreground border-border focus:border-primary" // Use bg-input for consistency
               />
             </div>
           </div>
           <div className="space-y-1">
              <label htmlFor="date" className="text-sm font-medium text-muted-foreground">{t('dateLabel')}</label>
-            <DatePicker date={selectedDate} setDate={setSelectedDate} buttonClassName="w-full bg-background text-foreground" placeholder={t('DatePicker.placeholder')} />
+            <DatePicker 
+              date={selectedDate} 
+              setDate={setSelectedDate} 
+              buttonClassName="w-full bg-input text-foreground border-border hover:border-primary focus:border-primary" // Use bg-input
+              placeholder={t('DatePicker.placeholder')} 
+            />
           </div>
           <div className="space-y-1">
             <label htmlFor="location" className="text-sm font-medium text-muted-foreground">{t('locationLabel')}</label>
             <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger id="location" className="w-full bg-background text-foreground">
+              <SelectTrigger id="location" className="w-full bg-input text-foreground border-border focus:border-primary"> {/* Use bg-input */}
                 <SelectValue placeholder={t('locationPlaceholder')} />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
@@ -193,7 +202,7 @@ export default function EventListingPage() {
           <div className="space-y-1">
             <label htmlFor="eventType" className="text-sm font-medium text-muted-foreground">{t('eventTypeLabel')}</label>
             <Select value={selectedEventType} onValueChange={(value) => setSelectedEventType(value as EventCategory)}>
-              <SelectTrigger id="eventType" className="w-full bg-background text-foreground">
+              <SelectTrigger id="eventType" className="w-full bg-input text-foreground border-border focus:border-primary"> {/* Use bg-input */}
                 <SelectValue placeholder={t('eventTypePlaceholder')} />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
@@ -208,7 +217,7 @@ export default function EventListingPage() {
         </div>
         {hasActiveFilters && (
             <div className="mt-4 flex justify-end">
-                <Button variant="ghost" onClick={clearFilters} className="text-primary">
+                <Button variant="ghost" onClick={clearFilters} className="text-primary hover:bg-primary/10">
                     <XIcon className="mr-2 h-4 w-4" /> {t('clearFilters')}
                 </Button>
             </div>
@@ -219,13 +228,14 @@ export default function EventListingPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {[...Array(10)].map((_, i) => (
-              <Card key={i} className="animate-pulse bg-card border-none shadow-lg">
-                <div className="aspect-[4/5] bg-muted rounded-t-md"></div>
+              <Card key={i} className="animate-pulse bg-card border-none shadow-lg rounded-lg">
+                <div className="aspect-[4/5] bg-muted/50 rounded-t-lg"></div>
                 <CardContent className="p-3 space-y-2">
-                  <div className="h-4 w-1/4 bg-muted rounded"></div>
-                  <div className="h-5 w-3/4 bg-muted rounded"></div>
-                  <div className="h-4 w-1/2 bg-muted rounded"></div>
-                  <div className="h-9 w-full bg-muted rounded mt-2"></div>
+                  <div className="h-3 w-1/3 bg-muted/50 rounded"></div> {/* Date placeholder */}
+                  <div className="h-4 w-3/4 bg-muted/50 rounded"></div> {/* Name placeholder line 1 */}
+                  <div className="h-4 w-1/2 bg-muted/50 rounded"></div> {/* Name placeholder line 2 */}
+                  <div className="h-3 w-2/3 bg-muted/50 rounded"></div> {/* Location placeholder */}
+                  <div className="h-9 w-full bg-muted/50 rounded mt-2"></div> {/* Button placeholder */}
                 </CardContent>
               </Card>
             ))}
@@ -233,7 +243,7 @@ export default function EventListingPage() {
         ) : filteredEvents.length > 0 ? (
            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredEvents.map((event) => (
-              <Card key={event.id} className="overflow-hidden bg-card text-card-foreground border-none shadow-lg flex flex-col">
+              <Card key={event.id} className="overflow-hidden bg-card text-card-foreground border-transparent shadow-lg flex flex-col rounded-lg">
                 <Link href={`/events/${event.id}`} className="block group flex flex-col h-full">
                   <div className="relative w-full aspect-[4/5]">
                     <Image
@@ -241,27 +251,27 @@ export default function EventListingPage() {
                       alt={event.name}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-                      className="object-cover rounded-t-md"
+                      className="object-cover rounded-t-lg"
                        data-ai-hint={`${event.eventType} event poster`}
                     />
                      {event.soldOut && (
-                        <div className="absolute top-1/2 left-0 right-0 bg-destructive/80 text-destructive-foreground text-center py-2 font-bold text-lg -rotate-12 transform -translate-y-1/2">
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] bg-destructive/90 text-destructive-foreground text-center py-2 font-bold text-lg -rotate-[30deg] shadow-xl">
                           SOLD OUT
                         </div>
                       )}
                   </div>
                   <CardContent className="p-3 flex flex-col flex-grow">
                       <p className="text-xs text-primary font-semibold mb-1">{formatEventListDate(event)}</p>
-                      <h3 className="text-sm font-semibold mb-1 leading-tight h-10 overflow-hidden group-hover:text-primary">
+                      <h3 className="text-sm font-semibold text-card-foreground mb-1 leading-tight h-10 overflow-hidden group-hover:text-primary">
                         {event.name}
                       </h3>
-                      <div className="flex items-start text-xs text-muted-foreground mb-3">
-                        <MapPinIcon className="h-3 w-3 mr-1 mt-0.5 shrink-0" /> 
-                        <span className="line-clamp-2">{event.location.name}</span>
+                      <div className="flex items-center text-xs text-muted-foreground mb-3"> {/* items-center for vertical alignment */}
+                        <MapPinIcon className="h-3 w-3 mr-1.5 shrink-0" /> 
+                        <span className="line-clamp-1">{event.location.name || t('unnamedLocation')}</span> {/* Ensure single line for location */}
                       </div>
                       <div className="mt-auto">
                         {event.soldOut ? (
-                          <Button variant="outline" className="w-full border-foreground/50 text-foreground/70 cursor-not-allowed" disabled>
+                          <Button variant="outline" className="w-full border-foreground/70 text-foreground/70 cursor-not-allowed hover:bg-transparent hover:border-foreground hover:text-foreground" disabled>
                             {tHome('soldOutButton')}
                           </Button>
                         ) : (
@@ -288,4 +298,3 @@ export default function EventListingPage() {
     </div>
   );
 }
-

@@ -5,48 +5,45 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%; /* Black - main page background */
-    --foreground: 0 0% 98%;    /* White - main text color */
+    --background: 240 10% 3.9%;        /* Very Dark Blue/Almost Black - Page BG */
+    --foreground: 0 0% 98%;            /* White - Main text */
 
-    --card: 0 0% 100%; /* White - Card backgrounds */
-    --card-foreground: 240 10% 3.9%; /* Black - Text on cards */
+    --card: 240 6% 10%;                 /* Dark Grey - Card BG */
+    --card-foreground: 0 0% 98%;       /* White - Text on cards */
 
-    --popover: 0 0% 100%; /* White popovers */
-    --popover-foreground: 240 10% 3.9%; /* Black text on popovers */
+    --popover: 240 6% 12%;              /* Dark Grey Popovers */
+    --popover-foreground: 0 0% 98%;    /* White text on popovers */
 
-    /* Interactive elements use Red */
-    --primary: 0 100% 50%; /* Red #FF0000 */
-    --primary-foreground: 0 0% 98%; /* White text on Red buttons */
+    --primary: 0 72% 51%;              /* Red (Adjusted for better harmony) */
+    --primary-foreground: 0 0% 98%;    /* White text on Red buttons */
 
-    /* Secondary buttons or elements */
-    --secondary: 240 5% 15%; /* Dark Grey */
-    --secondary-foreground: 0 0% 98%; /* White */
+    --secondary: 240 5% 25%;           /* Darker Grey for secondary elements */
+    --secondary-foreground: 0 0% 98%;  /* White */
 
-    --muted: 0 0% 96.1%; /* Light grey for muted text on cards/popovers */
-    --muted-foreground: 0 0% 45.1%; /* Darker grey for muted text on cards/popovers */
+    --muted: 240 5% 15%;               /* Dark grey for muted elements like dividers or subtle BG */
+    --muted-foreground: 0 0% 65%;      /* Lighter Grey for muted text (like date/location on card) */
 
-    /* Accent is also Red */
-    --accent: 0 100% 50%; /* Red */
-    --accent-foreground: 0 0% 98%; /* White */
+    --accent: 0 72% 51%;               /* Red for accent (can be same as primary) */
+    --accent-foreground: 0 0% 98%;     /* White */
 
-    --destructive: 0 70% 45%; /* Darker Red for destructive */
+    --destructive: 0 63% 40%;          /* Darker Red for destructive actions */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 89.8%; /* Light grey border for elements on cards/popovers */
-    --input: 0 0% 89.8%; /* Light grey input border (used for Radix components) */
-    --ring: 0 100% 50%; /* Red for focus rings */
+    --border: 240 5% 25%;              /* Border for inputs, cards if needed (subtle dark grey, slightly lighter for inputs) */
+    --input: 240 5% 18%;               /* Background for input fields (dark grey, slightly lighter than card) */
+    --ring: 0 72% 51%;                 /* Red for focus rings */
 
     --radius: 0.5rem;
 
     /* Sidebar (dark) */
     --sidebar-background: 240 10% 5%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 100% 50%;
+    --sidebar-primary: 0 72% 51%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 5% 20%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 5% 15%;
-    --sidebar-ring: 0 100% 50%;
+    --sidebar-ring: 0 72% 51%;
 
     /* Chart colors */
     --chart-1: 210 90% 50%;
@@ -55,32 +52,33 @@
     --chart-4: 280 85% 60%;
     --chart-5: 340 85% 55%;
 
-    /* Font variables (Geist is already set up in layout) */
-    /* --font-geist-sans is provided by next/font */
-    /* --font-geist-mono is provided by next/font */
-    --font-sarabun: 'Sarabun', system-ui, sans-serif; /* explicit fallback for Sarabun variable */
+    /* Font variables */
+    --font-sarabun: 'Sarabun', system-ui, sans-serif; 
   }
 
+  /*
+    The .dark class is applied to the HTML tag.
+    If any specific overrides are needed for components that behave differently
+    ONLY when .dark is present (and not just relying on :root), they can go here.
+    However, with :root defining the dark theme, this block might be minimal or empty
+    for core color definitions.
+  */
   .dark {
-    /* Ensure .dark specific overrides if needed, but :root is now the dark theme */
-    /* For example, if a component specifically needs a darker muted text on the main dark background */
-    --muted: 240 5% 25%; 
-    --muted-foreground: 0 0% 65%;
-    --border: 240 5% 20%; /* Dark Grey border for elements on main dark bg */
-    --input: 240 5% 15%; /* Dark Grey input background for main dark bg */
+    /* Example: If a specific component needed an even darker border in dark mode */
+    /* --border: 240 5% 15%; */
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border; /* Default border color for all elements */
   }
   body {
-    @apply bg-background text-foreground font-sans; /* Use Tailwind's font-sans utility */
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans); /* Apply GeistSans by default */
   }
 
-  /* Apply Sarabun font if the lang attribute is 'th' */
   html[lang="th"] body {
-    @apply font-sarabun; /* Use Tailwind's font-sarabun utility */
+    font-family: var(--font-sarabun); /* Apply Sarabun for Thai */
   }
 }
