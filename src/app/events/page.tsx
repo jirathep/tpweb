@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ChangeEvent, FormEvent } from 'react';
@@ -8,12 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, ArrowRight, FilterIcon, XIcon } from 'lucide-react';
+import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, ArrowRight, FilterIcon, XIcon, Loader2 } from 'lucide-react';
 import type { Event, Location } from '@/lib/types';
 import { getEvents } from '@/services/event';
-import { DatePicker } from '@/components/ui/date-picker'; // Assuming you have a DatePicker component
+import { DatePicker } from '@/components/ui/date-picker'; 
 
-const ALL_FILTER_VALUE = "all";
+const ALL_FILTER_VALUE = "all"; // This value is fine as it's not empty
 
 export default function EventListingPage() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
@@ -27,10 +28,16 @@ export default function EventListingPage() {
   useEffect(() => {
     async function loadEvents() {
       setIsLoading(true);
-      const events = await getEvents();
-      setAllEvents(events);
-      setFilteredEvents(events);
-      setIsLoading(false);
+      try {
+        const events = await getEvents();
+        setAllEvents(events);
+        setFilteredEvents(events);
+      } catch (error) {
+        console.error("Failed to load events:", error);
+        // Optionally set an error state to display to the user
+      } finally {
+        setIsLoading(false);
+      }
     }
     loadEvents();
   }, []);
@@ -38,13 +45,13 @@ export default function EventListingPage() {
   const uniqueLocations = useMemo(() => {
     const locations = new Set<string>();
     allEvents.forEach(event => locations.add(event.location.name || 'Unknown Location'));
-    return Array.from(locations);
+    return Array.from(locations).filter(loc => loc.trim() !== ''); // Ensure no empty strings
   }, [allEvents]);
 
   const uniqueEventTypes = useMemo(() => {
     const types = new Set<string>();
     allEvents.forEach(event => types.add(event.eventType));
-    return Array.from(types);
+    return Array.from(types).filter(type => type.trim() !== ''); // Ensure no empty strings
   }, [allEvents]);
 
   useEffect(() => {
@@ -124,7 +131,9 @@ export default function EventListingPage() {
               <SelectContent className="bg-popover text-popover-foreground">
                 <SelectItem value={ALL_FILTER_VALUE}>All Locations</SelectItem>
                 {uniqueLocations.map(loc => (
-                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                  <SelectItem key={loc} value={loc || `location-${loc}`}> {/* Ensure value is not empty */}
+                    {loc || 'Unnamed Location'}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -138,7 +147,9 @@ export default function EventListingPage() {
               <SelectContent className="bg-popover text-popover-foreground">
                 <SelectItem value={ALL_FILTER_VALUE}>All Types</SelectItem>
                 {uniqueEventTypes.map(type => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                  <SelectItem key={type} value={type || `type-${type}`}> {/* Ensure value is not empty */}
+                    {type || 'Uncategorized'}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -218,9 +229,11 @@ export default function EventListingPage() {
             <FilterIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold text-foreground">No Events Found</h3>
             <p className="text-muted-foreground mt-2">Try adjusting your filters or check back later.</p>
+            {isLoading &&  <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary mt-4" />}
           </div>
         )}
       </section>
     </div>
   );
 }
+
