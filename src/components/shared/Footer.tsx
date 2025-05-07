@@ -17,18 +17,13 @@ const LineIcon = (props: ComponentProps<'svg'>) => (
 
 export default function Footer() {
   const t = useTranslations('Footer');
-  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
-  const [mounted, setMounted] = useState(false);
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [companyNameText, setCompanyNameText] = useState<string>('');
 
   useEffect(() => {
-    // Set mounted to true after the component mounts
-    // This ensures that operations depending on browser-specific APIs or
-    // values that might differ from SSR run only on the client post-hydration.
-    setMounted(true);
-    // If we needed to update the year based on client's date, we could do it here,
-    // but new Date().getFullYear() is generally safe for SSR too.
-    // setCurrentYear(new Date().getFullYear()); 
-  }, []);
+    setCurrentYear(new Date().getFullYear());
+    setCompanyNameText(t('companyFullName'));
+  }, [t]); // t is generally stable, so this runs once on mount
 
   const footerLinks = [
     {
@@ -67,14 +62,8 @@ export default function Footer() {
       ],
     },
   ];
-
-  // companyFullNameDisplay should now be consistent between server and client initial render.
-  const companyFullNameDisplay = t('companyFullName'); 
   
-  // copyrightText will use the year from SSR initially, and then update if needed (though unlikely for just year).
-  // The `mounted` check here is more for values that *must* come from the client, like Math.random().
-  // For `new Date().getFullYear()`, it's usually fine.
-  const copyrightText = t('copyright', { year: currentYear });
+  const copyrightText = currentYear ? t('copyright', { year: currentYear }) : "";
 
 
   return (
@@ -84,7 +73,7 @@ export default function Footer() {
           {/* Column 1: Company Info & Social */}
           <div className="lg:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-xl font-bold text-foreground">{companyFullNameDisplay}</span>
+              <span className="text-xl font-bold text-foreground">{companyNameText || <>&nbsp;</>}</span>
             </div>
             <p className="text-muted-foreground mb-1">{t('addressLine1')}</p>
             <p className="text-muted-foreground mb-1">{t('addressLine2')}</p>
@@ -118,7 +107,7 @@ export default function Footer() {
 
         <div className="border-t border-border pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            {copyrightText}
+            {copyrightText || <>&nbsp;</>}
           </p>
         </div>
       </div>
