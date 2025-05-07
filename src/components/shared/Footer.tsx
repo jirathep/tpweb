@@ -62,7 +62,7 @@ export default function Footer() {
           {/* Column 1: Company Info & Social */}
           <div className="lg:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-xl font-bold text-foreground">411ENTERTAINMENT Co., Ltd.</span>
+              <span className="text-xl font-bold text-foreground">TICKETPROMPT Co., Ltd.</span>
             </div>
             <p className="text-muted-foreground mb-1">{t('addressLine1')}</p>
             <p className="text-muted-foreground mb-1">{t('addressLine2')}</p>
@@ -103,3 +103,4 @@ export default function Footer() {
     </footer>
   );
 }
+
