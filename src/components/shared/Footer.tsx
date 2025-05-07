@@ -18,9 +18,11 @@ const LineIcon = (props: ComponentProps<'svg'>) => (
 export default function Footer() {
   const t = useTranslations('Footer');
   const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
+    setMounted(true);
   }, []);
 
   const footerLinks = [
@@ -61,6 +63,13 @@ export default function Footer() {
     },
   ];
 
+  // Prepare display values that depend on client-side state or resolution
+  const companyFullNameDisplay = mounted ? t('companyFullName') : ""; // Empty string for SSR/initial client render
+  const copyrightText = mounted && currentYear !== null 
+    ? t('copyright', { year: currentYear }) 
+    : t('copyright', { year: new Date().getFullYear() }); // Fallback for SSR/initial client
+
+
   return (
     <footer className="bg-background border-t border-border py-10 text-sm">
       <div className="container mx-auto px-4">
@@ -68,7 +77,7 @@ export default function Footer() {
           {/* Column 1: Company Info & Social */}
           <div className="lg:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-xl font-bold text-foreground">{t('companyFullName')}</span>
+              <span className="text-xl font-bold text-foreground">{companyFullNameDisplay}</span>
             </div>
             <p className="text-muted-foreground mb-1">{t('addressLine1')}</p>
             <p className="text-muted-foreground mb-1">{t('addressLine2')}</p>
@@ -102,10 +111,11 @@ export default function Footer() {
 
         <div className="border-t border-border pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            {currentYear ? t('copyright', { year: currentYear }) : t('copyright', { year: new Date().getFullYear() })}
+            {copyrightText}
           </p>
         </div>
       </div>
     </footer>
   );
 }
+
