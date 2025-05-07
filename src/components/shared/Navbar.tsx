@@ -1,3 +1,4 @@
+
 import { Link } from '@/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,15 +35,16 @@ export default function Navbar() {
           <Button variant="ghost" asChild>
             <Link href="/events">{t('events')}</Link>
           </Button>
+          <LocaleSwitcher />
           <Button variant="ghost" asChild className="text-primary hover:text-primary/90 hover:bg-primary/10">
             <Link href="/signup">{t('signup')}</Link>
           </Button>
           <Button variant="default" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Link href="/login">{t('login')}</Link>
           </Button>
-          <LocaleSwitcher />
         </nav>
       </div>
     </header>
   );
 }
+
