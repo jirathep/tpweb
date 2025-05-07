@@ -33,7 +33,8 @@
     "soldOutButton": "Sold Out",
     "eventDateOn": "{date}",
     "eventDateRange": "{startDate} - {endDate}",
-    "buyTicketsButton": "Buy Tickets"
+    "buyTicketsButton": "Buy Tickets",
+    "uncategorized": "Other"
   },
   "EventListingPage": {
     "title": "Find Your Next Experience",

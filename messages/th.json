@@ -33,7 +33,8 @@
     "soldOutButton": "ขายหมดแล้ว",
     "eventDateOn": "{date}",
     "eventDateRange": "{startDate} - {endDate}",
-    "buyTicketsButton": "ซื้อบัตร"
+    "buyTicketsButton": "ซื้อบัตร",
+    "uncategorized": "อื่นๆ"
   },
   "EventListingPage": {
     "title": "ค้นหาประสบการณ์ครั้งต่อไปของคุณ",
