@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, ArrowRight, FilterIcon, XIcon, Loader2 } from 'lucide-react';
-import type { Event } from '@/lib/types';
+import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, ArrowRight, FilterIcon, XIcon, Loader2, Ticket } from 'lucide-react';
+import type { Event, EventCategory } from '@/lib/types';
 import { getEvents } from '@/services/event';
 import { DatePicker } from '@/components/ui/date-picker'; 
 import { useTranslations, useLocale } from 'next-intl';
@@ -18,17 +18,20 @@ import { format as formatDateFns, parseISO } from 'date-fns';
 import { enUS, th } from 'date-fns/locale';
 
 
-const ALL_FILTER_VALUE = "all"; 
+const ALL_FILTER_VALUE = "All"; 
+const EVENT_CATEGORIES_FOR_FILTER: EventCategory[] = ['All', 'Concert', 'Performance', 'Sport', 'Exhibition', 'Conference', 'Other'];
+
 
 export default function EventListingPage() {
   const t = useTranslations('EventListingPage');
+  const tHome = useTranslations('HomePage'); // For tab names
   const locale = useLocale();
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedLocation, setSelectedLocation] = useState(ALL_FILTER_VALUE);
-  const [selectedEventType, setSelectedEventType] = useState(ALL_FILTER_VALUE);
+  const [selectedEventType, setSelectedEventType] = useState<EventCategory>(ALL_FILTER_VALUE as EventCategory);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -53,11 +56,11 @@ export default function EventListingPage() {
     return Array.from(locations).filter(loc => loc.trim() !== '');
   }, [allEvents, t]);
 
-  const uniqueEventTypes = useMemo(() => {
-    const types = new Set<string>();
-    allEvents.forEach(event => types.add(event.eventType));
-    return Array.from(types).filter(type => type.trim() !== '');
-  }, [allEvents]);
+  // Use EVENT_CATEGORIES_FOR_FILTER for the select dropdown
+  const eventTypesForFilter = useMemo(() => {
+    return EVENT_CATEGORIES_FOR_FILTER;
+  }, []);
+
 
   useEffect(() => {
     let events = allEvents;
@@ -94,7 +97,7 @@ export default function EventListingPage() {
     setSearchTerm('');
     setSelectedDate(undefined);
     setSelectedLocation(ALL_FILTER_VALUE);
-    setSelectedEventType(ALL_FILTER_VALUE);
+    setSelectedEventType(ALL_FILTER_VALUE as EventCategory);
   };
 
   const hasActiveFilters = 
@@ -107,12 +110,43 @@ export default function EventListingPage() {
     return locale === 'th' ? th : enUS;
   };
   
-  const formatEventDate = (dateStr: string) => {
-    try {
-      return formatDateFns(parseISO(dateStr), 'PPP', { locale: getDateLocale() });
-    } catch (e) {
-      console.error("Error formatting date:", dateStr, e);
-      return dateStr; // fallback to original string if parsing fails
+  const formatEventListDate = (event: Event) => {
+    if (!event.dates || event.dates.length === 0) return '';
+    
+    const formatDate = (dateStr: string) => {
+      try {
+        return formatDateFns(parseISO(dateStr), 'dd.MM.yyyy', { locale: getDateLocale() });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    const sortedDates = [...event.dates].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    if (sortedDates.length === 1) {
+      return `${formatDate(sortedDates[0].date)} ${t('atTime', { time: sortedDates[0].time})}`;
+    }
+    
+    const firstDate = formatDate(sortedDates[0].date);
+    const lastDate = formatDate(sortedDates[sortedDates.length - 1].date);
+    
+    if (firstDate === lastDate) {
+        return `${firstDate} ${t('atTime', { time: sortedDates[0].time})}`; // Show first time if multiple on same day
+    }
+
+    return tHome('eventDateRange', { startDate: firstDate, endDate: lastDate });
+  };
+  
+  const getCategoryKeyForTranslation = (category: EventCategory) => {
+    switch (category) {
+      case 'All': return 'allEventsTab';
+      case 'Concert': return 'concertsTab';
+      case 'Performance': return 'performancesTab';
+      case 'Sport': return 'sportsTab';
+      case 'Exhibition': return 'exhibitionsTab';
+      case 'Conference': return 'performancesTab'; // Assuming Conference maps to a general performance/show tab
+      case 'Other': return 'uncategorized'; // Or a specific "Other" translation if available
+      default: return 'allTypes';
     }
   };
 
@@ -149,7 +183,7 @@ export default function EventListingPage() {
               <SelectContent className="bg-popover text-popover-foreground">
                 <SelectItem value={ALL_FILTER_VALUE}>{t('allLocations')}</SelectItem>
                 {uniqueLocations.map(loc => (
-                  <SelectItem key={loc} value={loc || `location-${loc}`}>
+                  <SelectItem key={loc} value={loc}>
                     {loc || t('unnamedLocation')}
                   </SelectItem>
                 ))}
@@ -158,15 +192,14 @@ export default function EventListingPage() {
           </div>
           <div className="space-y-1">
             <label htmlFor="eventType" className="text-sm font-medium text-muted-foreground">{t('eventTypeLabel')}</label>
-            <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+            <Select value={selectedEventType} onValueChange={(value) => setSelectedEventType(value as EventCategory)}>
               <SelectTrigger id="eventType" className="w-full bg-background text-foreground">
                 <SelectValue placeholder={t('eventTypePlaceholder')} />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
-                <SelectItem value={ALL_FILTER_VALUE}>{t('allTypes')}</SelectItem>
-                {uniqueEventTypes.map(type => (
-                  <SelectItem key={type} value={type || `type-${type}`}>
-                    {type || t('uncategorized')}
+                {eventTypesForFilter.map(type => (
+                  <SelectItem key={type} value={type}>
+                    {type === ALL_FILTER_VALUE ? t('allTypes') : tHome(getCategoryKeyForTranslation(type))}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -184,61 +217,61 @@ export default function EventListingPage() {
 
       <section>
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse bg-card">
-                <div className="h-48 bg-muted rounded-t-lg"></div>
-                <CardHeader>
-                  <div className="h-6 w-3/4 bg-muted rounded"></div>
-                  <div className="h-4 w-1/2 bg-muted rounded mt-2"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-4 w-full bg-muted rounded mb-2"></div>
-                  <div className="h-4 w-5/6 bg-muted rounded"></div>
-                  <div className="flex justify-between items-center mt-3">
-                    <div className="h-4 w-1/4 bg-muted rounded"></div>
-                    <div className="h-8 w-1/3 bg-muted rounded"></div>
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <Card key={i} className="animate-pulse bg-card border-none shadow-lg">
+                <div className="aspect-[4/5] bg-muted rounded-t-md"></div>
+                <CardContent className="p-3 space-y-2">
+                  <div className="h-4 w-1/4 bg-muted rounded"></div>
+                  <div className="h-5 w-3/4 bg-muted rounded"></div>
+                  <div className="h-4 w-1/2 bg-muted rounded"></div>
+                  <div className="h-9 w-full bg-muted rounded mt-2"></div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : filteredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredEvents.map((event) => (
-              <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 bg-card text-card-foreground">
-                <Link href={`/events/${event.id}`} className="block group">
-                  <div className="relative h-56 w-full">
+              <Card key={event.id} className="overflow-hidden bg-card text-card-foreground border-none shadow-lg flex flex-col">
+                <Link href={`/events/${event.id}`} className="block group flex flex-col h-full">
+                  <div className="relative w-full aspect-[4/5]">
                     <Image
                       src={event.imageUrl}
                       alt={event.name}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                      className="object-cover rounded-t-md"
                        data-ai-hint={`${event.eventType} event poster`}
                     />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                     {event.soldOut && (
+                        <div className="absolute top-1/2 left-0 right-0 bg-destructive/80 text-destructive-foreground text-center py-2 font-bold text-lg -rotate-12 transform -translate-y-1/2">
+                          SOLD OUT
+                        </div>
+                      )}
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl group-hover:text-primary transition-colors">{event.name}</CardTitle>
-                    <div className="flex items-center text-sm text-muted-foreground mt-1">
-                      <CalendarIcon className="h-4 w-4 mr-1.5" /> {formatEventDate(event.dates[0].date)} {t('atTime', { time: event.dates[0].time})}
-                    </div>
-                     <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPinIcon className="h-4 w-4 mr-1.5" /> {event.location.name}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-3 h-20 overflow-hidden">{event.description.substring(0,120)}...</p>
-                    <div className="flex justify-between items-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
-                        <TagIcon className="h-3 w-3 mr-1" /> {event.eventType}
-                      </span>
-                      <Button variant="link" className="p-0 h-auto text-primary group-hover:underline">
-                        {t('viewDetails')} <ArrowRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
+                  <CardContent className="p-3 flex flex-col flex-grow">
+                      <p className="text-xs text-primary font-semibold mb-1">{formatEventListDate(event)}</p>
+                      <h3 className="text-sm font-semibold mb-1 leading-tight h-10 overflow-hidden group-hover:text-primary">
+                        {event.name}
+                      </h3>
+                      <div className="flex items-start text-xs text-muted-foreground mb-3">
+                        <MapPinIcon className="h-3 w-3 mr-1 mt-0.5 shrink-0" /> 
+                        <span className="line-clamp-2">{event.location.name}</span>
+                      </div>
+                      <div className="mt-auto">
+                        {event.soldOut ? (
+                          <Button variant="outline" className="w-full border-foreground/50 text-foreground/70 cursor-not-allowed" disabled>
+                            {tHome('soldOutButton')}
+                          </Button>
+                        ) : (
+                          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                             <Ticket className="mr-2 h-4 w-4" />
+                            {tHome('buyTicketsButton')}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
                 </Link>
               </Card>
             ))}
@@ -255,3 +288,4 @@ export default function EventListingPage() {
     </div>
   );
 }
+

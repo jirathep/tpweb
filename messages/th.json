@@ -1,3 +1,4 @@
+
 {
   "Navbar": {
     "title": "พร้อมท์ อีทิกเก็ต",
@@ -21,7 +22,18 @@
     "latestNewsTitle": "ข่าวล่าสุด",
     "noNews": "ไม่มีข่าวสารในขณะนี้",
     "detailsButton": "รายละเอียด",
-    "readMoreButton": "อ่านเพิ่มเติม"
+    "readMoreButton": "อ่านเพิ่มเติม",
+    "popularEvents": "อิเว้นต์ยอดนิยม",
+    "newlyAddedEvents": "อิเว้นต์เร็วๆนี้",
+    "allEventsTab": "งานแสดงทั้งหมด",
+    "concertsTab": "คอนเสิร์ต",
+    "performancesTab": "การแสดง",
+    "sportsTab": "กีฬา",
+    "exhibitionsTab": "เอ็กซิบิชั่น",
+    "soldOutButton": "ขายหมดแล้ว",
+    "eventDateOn": "{date}",
+    "eventDateRange": "{startDate} - {endDate}",
+    "buyTicketsButton": "ซื้อบัตร"
   },
   "EventListingPage": {
     "title": "ค้นหาประสบการณ์ครั้งต่อไปของคุณ",
@@ -172,3 +184,4 @@
     "goHome": "ไปที่หน้าแรก"
   }
 }
+

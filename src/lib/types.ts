@@ -11,17 +11,21 @@ export interface EventDate {
   rounds?: string[]; // Optional: e.g., ["Round 1", "Round 2"]
 }
 
+export type EventCategory = 'All' | 'Concert' | 'Performance' | 'Sport' | 'Exhibition' | 'Conference' | 'Other';
+
+
 export interface Event {
   id: string;
   name: string;
   description: string;
   dates: EventDate[];
   location: Location;
-  eventType: string; // e.g., "Concert", "Sports", "Conference"
+  eventType: EventCategory; // e.g., "Concert", "Sports", "Conference"
   imageUrl: string;
   bannerUrl?: string; // Optional for hero banner
   tags?: string[];
   organizer?: string;
+  soldOut?: boolean;
 }
 
 export interface Seat {
@@ -78,3 +82,4 @@ export interface NewsArticle {
   date: string;
   imageUrl?: string;
 }
+

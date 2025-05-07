@@ -1,3 +1,4 @@
+
 {
   "Navbar": {
     "title": "Prompt eTicket",
@@ -21,7 +22,18 @@
     "latestNewsTitle": "Latest News",
     "noNews": "No news articles available.",
     "detailsButton": "Details",
-    "readMoreButton": "Read More"
+    "readMoreButton": "Read More",
+    "popularEvents": "Popular Events",
+    "newlyAddedEvents": "Newly Added Events",
+    "allEventsTab": "All Shows",
+    "concertsTab": "Concerts",
+    "performancesTab": "Performances",
+    "sportsTab": "Sports",
+    "exhibitionsTab": "Exhibitions",
+    "soldOutButton": "Sold Out",
+    "eventDateOn": "{date}",
+    "eventDateRange": "{startDate} - {endDate}",
+    "buyTicketsButton": "Buy Tickets"
   },
   "EventListingPage": {
     "title": "Find Your Next Experience",
@@ -172,3 +184,4 @@
     "goHome": "Go to Homepage"
   }
 }
+
