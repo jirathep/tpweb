@@ -5,13 +5,22 @@ export interface Location {
   name?: string; // e.g., "Crypto.com Arena"
 }
 
+export type EventDateType = 'show' | 'presale_nightrain' | 'presale_general' | 'onsale_public' | 'other';
+
 export interface EventDate {
   date: string; // YYYY-MM-DD
   time: string; // HH:MM
   rounds?: string[]; // Optional: e.g., ["Round 1", "Round 2"]
+  gateOpenTime?: string; // Optional: HH:MM
+  label?: string; // Optional: e.g., "Nightrain pre-sale", "Public on-sale"
+  type?: EventDateType; // To categorize dates
+  endDate?: string; // Optional: YYYY-MM-DD for date ranges
+  endTime?: string; // Optional: HH:MM for date ranges
 }
 
 export type EventCategory = 'All' | 'Concert' | 'Performance' | 'Sport' | 'Exhibition' | 'Conference' | 'Other';
+
+export type TicketStatus = 'coming_soon' | 'on_sale' | 'sold_out' | 'off_sale' | 'unavailable';
 
 
 export interface Event {
@@ -25,7 +34,9 @@ export interface Event {
   bannerUrl?: string; // Optional for hero banner
   tags?: string[];
   organizer?: string;
-  soldOut?: boolean;
+  soldOut?: boolean; // This might be redundant if using ticketStatus
+  priceRangeDisplay?: string[]; // For displaying price tiers/ranges, e.g. ["VIP: 5000 THB", "Regular: 2000 THB"]
+  ticketStatus?: TicketStatus;
 }
 
 export interface Seat {
@@ -67,7 +78,7 @@ export interface UserInformation {
 
 export interface BookingDetails {
   event: Event;
-  selectedEventDate: EventDate;
+  selectedEventDate: EventDate; // This will be the primary 'show' date for booking
   selectedRound?: string;
   selectedSeats: SelectedSeatInfo[];
   totalPrice: number;
