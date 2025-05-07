@@ -1,6 +1,8 @@
 
 'use client';
 
+import type { ComponentProps } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/navigation'; 
 import {
@@ -13,8 +15,8 @@ import {
 import { cn } from '@/lib/utils';
 
 // Simplified SVG for Thailand Flag
-const ThaiFlagIcon = () => (
-  <svg width="20" height="14" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-5 rounded-sm">
+const ThaiFlagIcon = (props: ComponentProps<'svg'>) => (
+  <svg width="20" height="14" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("h-3.5 w-5 rounded-sm", props.className)} {...props}>
     <rect width="60" height="40" fill="#F4F5F8"/> {/* White background part */}
     <path d="M0 0H60V6.66H0V0Z" fill="#A51931"/> {/* Top Red */}
     <path d="M0 13.33H60V26.66H0V13.33Z" fill="#2D2A4A"/> {/* Middle Blue */}
@@ -23,8 +25,8 @@ const ThaiFlagIcon = () => (
 );
 
 // Simplified SVG for UK (Union Jack) Flag
-const UkFlagIcon = () => (
-  <svg width="20" height="14" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-5 rounded-sm">
+const UkFlagIcon = (props: ComponentProps<'svg'>) => (
+  <svg width="20" height="14" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" className={cn("h-3.5 w-5 rounded-sm", props.className)} {...props}>
     <rect width="60" height="30" fill="#012169"/> {/* Blue background */}
     <path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" strokeWidth="6"/> {/* St Andrew's Cross (white) */}
     <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4"/> {/* St Patrick's Cross (red, narrower) */}
@@ -39,6 +41,11 @@ export default function LocaleSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const onSelectChange = (nextLocale: string) => {
     router.replace(pathname, { locale: nextLocale });
@@ -50,9 +57,16 @@ export default function LocaleSwitcher() {
         className="w-auto bg-transparent border-none focus:ring-0 focus:ring-offset-0 text-foreground hover:bg-accent/10 px-2 py-1.5 h-auto flex items-center gap-1.5" 
         aria-label={t('label')}
       >
-        {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
-        <span className="text-xs font-medium">{locale.toUpperCase()}</span>
-        {/* <SelectValue placeholder={t('label')} /> */}
+        {isClient ? (
+          <>
+            {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
+            <span className="text-xs font-medium">{locale.toUpperCase()}</span>
+          </>
+        ) : (
+          // Placeholder for SSR and pre-hydration to prevent mismatch
+          // Using SelectValue ensures the trigger has some content, or provide a simple static placeholder
+          <SelectValue placeholder={t('label')} />
+        )}
       </SelectTrigger>
       <SelectContent className="min-w-[8rem] bg-popover text-popover-foreground">
         <SelectItem value="en" className="cursor-pointer flex items-center gap-2 py-1.5">
