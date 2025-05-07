@@ -13,13 +13,15 @@ import type { Event, Location } from '@/lib/types';
 import { getEvents } from '@/services/event';
 import { DatePicker } from '@/components/ui/date-picker'; // Assuming you have a DatePicker component
 
+const ALL_FILTER_VALUE = "all";
+
 export default function EventListingPage() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedEventType, setSelectedEventType] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState(ALL_FILTER_VALUE);
+  const [selectedEventType, setSelectedEventType] = useState(ALL_FILTER_VALUE);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -61,11 +63,11 @@ export default function EventListingPage() {
       );
     }
 
-    if (selectedLocation) {
+    if (selectedLocation && selectedLocation !== ALL_FILTER_VALUE) {
       events = events.filter(event => (event.location.name || 'Unknown Location') === selectedLocation);
     }
 
-    if (selectedEventType) {
+    if (selectedEventType && selectedEventType !== ALL_FILTER_VALUE) {
       events = events.filter(event => event.eventType === selectedEventType);
     }
 
@@ -79,9 +81,15 @@ export default function EventListingPage() {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedDate(undefined);
-    setSelectedLocation('');
-    setSelectedEventType('');
+    setSelectedLocation(ALL_FILTER_VALUE);
+    setSelectedEventType(ALL_FILTER_VALUE);
   };
+
+  const hasActiveFilters = 
+    searchTerm || 
+    selectedDate || 
+    (selectedLocation && selectedLocation !== ALL_FILTER_VALUE) || 
+    (selectedEventType && selectedEventType !== ALL_FILTER_VALUE);
 
 
   return (
@@ -114,7 +122,7 @@ export default function EventListingPage() {
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value={ALL_FILTER_VALUE}>All Locations</SelectItem>
                 {uniqueLocations.map(loc => (
                   <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                 ))}
@@ -128,7 +136,7 @@ export default function EventListingPage() {
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value={ALL_FILTER_VALUE}>All Types</SelectItem>
                 {uniqueEventTypes.map(type => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
@@ -136,7 +144,7 @@ export default function EventListingPage() {
             </Select>
           </div>
         </div>
-        {(searchTerm || selectedDate || selectedLocation || selectedEventType) && (
+        {hasActiveFilters && (
             <div className="mt-4 flex justify-end">
                 <Button variant="ghost" onClick={clearFilters} className="text-primary">
                     <XIcon className="mr-2 h-4 w-4" /> Clear Filters
