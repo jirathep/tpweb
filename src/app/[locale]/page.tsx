@@ -1,26 +1,26 @@
-import Link from 'next/link';
+import Link from 'next-link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image from 'next/image';
 import { ArrowRight, CalendarDays, Newspaper } from 'lucide-react';
 import type { Event, NewsArticle } from '@/lib/types';
-import { getEvents } from '@/services/event'; // Updated import
-import { getNews } from '@/services/news'; // New import for news
+import { getEvents } from '@/services/event'; 
+import { getNews } from '@/services/news';
+import { getTranslations } from 'next-intl/server';
 
 async function getFeaturedEvents(): Promise<Event[]> {
-  // For now, return a subset of all events or specific featured ones
   const allEvents = await getEvents();
-  return allEvents.slice(0, 3); // Example: show first 3 as featured
+  return allEvents.slice(0, 3);
 }
 
 export default async function HomePage() {
+  const t = await getTranslations('HomePage');
   const featuredEvents = await getFeaturedEvents();
   const newsArticles = await getNews();
   const highlightEvent = featuredEvents.length > 0 ? featuredEvents[0] : null;
 
   return (
     <div className="space-y-12">
-      {/* Hero Section - Highlight Event */}
       {highlightEvent && (
         <section className="relative rounded-lg overflow-hidden shadow-2xl">
           <Image
@@ -38,23 +38,22 @@ export default async function HomePage() {
             <p className="text-lg md:text-xl mb-4 max-w-2xl drop-shadow-md">{highlightEvent.description.substring(0,150)}...</p>
             <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Link href={`/events/${highlightEvent.id}`}>
-                Book Now <ArrowRight className="ml-2 h-5 w-5" />
+                {t('heroButton')} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
         </section>
       )}
 
-      {/* Upcoming Events Section */}
       <section>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground flex items-center">
             <CalendarDays className="mr-3 h-8 w-8 text-primary" />
-            Upcoming Events
+            {t('upcomingEventsTitle')}
           </h2>
           <Button variant="outline" asChild>
             <Link href="/events">
-              View All Events <ArrowRight className="ml-2 h-4 w-4" />
+              {t('viewAllEvents')} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -77,11 +76,11 @@ export default async function HomePage() {
                     <CardDescription>{event.dates[0].date} - {event.location.name}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-3">{event.description.substring(0, 100)}...</p>
+                    <p className="text-sm text-muted-foreground mb-3 h-16 overflow-hidden">{event.description.substring(0, 100)}...</p>
                     <div className="flex justify-between items-center">
                        <span className="text-sm font-semibold text-primary">{event.eventType}</span>
                        <Button variant="link" className="p-0 h-auto text-primary">
-                          Details <ArrowRight className="ml-1 h-4 w-4" />
+                          {t('detailsButton')} <ArrowRight className="ml-1 h-4 w-4" />
                        </Button>
                     </div>
                   </CardContent>
@@ -90,16 +89,15 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">No upcoming events at the moment. Check back soon!</p>
+          <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
         )}
       </section>
 
-      {/* News Section */}
       <section>
          <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground flex items-center">
             <Newspaper className="mr-3 h-8 w-8 text-primary" />
-            Latest News
+            {t('latestNewsTitle')}
           </h2>
         </div>
         {newsArticles.length > 0 ? (
@@ -122,14 +120,14 @@ export default async function HomePage() {
                 <CardDescription className="text-xs text-muted-foreground mb-2">{article.date}</CardDescription>
                 <p className="text-sm text-muted-foreground mb-3">{article.summary}</p>
                 <Button variant="link" className="p-0 h-auto text-primary">
-                  Read More <ArrowRight className="ml-1 h-4 w-4" />
+                  {t('readMoreButton')} <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             </Card>
           ))}
         </div>
          ) : (
-          <p className="text-muted-foreground">No news articles available.</p>
+          <p className="text-muted-foreground">{t('noNews')}</p>
         )}
       </section>
     </div>

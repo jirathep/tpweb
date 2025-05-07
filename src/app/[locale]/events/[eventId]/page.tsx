@@ -1,18 +1,26 @@
+
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation'; // Use from next/navigation for client components
+import { useRouter } from 'next-intl/client'; // Use from next-intl/client for locale-aware routing
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarDays, Clock, MapPin, Users, Tag, Loader2, ArrowLeft } from 'lucide-react';
-import type { Event, EventDate } from '@/lib/types';
+import type { Event } from '@/lib/types';
 import { getEventById } from '@/services/event';
 import { useBooking } from '@/context/BookingContext';
+import { useTranslations, useLocale } from 'next-intl';
+import { format as formatDateFns, parseISO } from 'date-fns';
+import { enUS, th } from 'date-fns/locale';
 
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations('EventDetailPage');
+  const locale = useLocale();
+
   const eventId = params.eventId as string;
   const [event, setEvent] = useState<Event | null>(null);
   const [selectedEventDate, setSelectedEventDate] = useState<string>(''); // Store as "date|time"
@@ -37,7 +45,6 @@ export default function EventDetailPage() {
         .catch(err => {
           console.error("Failed to fetch event details:", err);
           setIsLoading(false);
-          // Optionally redirect or show error message
         });
     }
   }, [eventId]);
@@ -66,13 +73,31 @@ export default function EventDetailPage() {
       event: event,
       selectedEventDate: currentEventDateDetails,
       selectedRound: selectedRound,
-      selectedSeats: [], // Reset seats when proceeding
-      totalPrice: 0, // Reset price
+      selectedSeats: [], 
+      totalPrice: 0, 
     }));
     router.push(`/events/${eventId}/select-seats`);
   };
   
   const currentSelectedDateDetails = event?.dates.find(d => `${d.date}|${d.time}` === selectedEventDate);
+
+  const getDateLocale = () => {
+    return locale === 'th' ? th : enUS;
+  };
+  
+  const formatEventDisplayDate = (dateStr: string, timeStr: string) => {
+     try {
+      const dateObj = parseISO(dateStr);
+      // Using PPPP for full date with weekday, LL for month, dd for day, yyyy for year
+      // Adjust format string as needed per locale if PPPP is not desired
+      const formattedDate = formatDateFns(dateObj, 'PPPP', { locale: getDateLocale() });
+      return `${formattedDate} ${t('atTime', { time: timeStr })}`;
+    } catch (e) {
+      console.error("Error formatting display date:", dateStr, e);
+      return `${dateStr} ${t('atTime', { time: timeStr })}`;
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -85,10 +110,10 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-destructive">Event not found</h2>
-        <p className="text-muted-foreground mt-2">The event you are looking for does not exist or may have been removed.</p>
+        <h2 className="text-2xl font-semibold text-destructive">{t('eventNotFoundTitle')}</h2>
+        <p className="text-muted-foreground mt-2">{t('eventNotFoundDescription')}</p>
         <Button onClick={() => router.push('/events')} variant="outline" className="mt-6">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Events
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t('backToEventsButton')}
         </Button>
       </div>
     );
@@ -97,7 +122,7 @@ export default function EventDetailPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <Button onClick={() => router.back()} variant="outline" className="mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        <ArrowLeft className="mr-2 h-4 w-4" /> {t('backButton')}
       </Button>
       <Card className="overflow-hidden bg-card text-card-foreground shadow-xl">
         <div className="relative h-64 md:h-96 w-full">
@@ -116,38 +141,37 @@ export default function EventDetailPage() {
         </div>
         <CardContent className="p-6 space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-2 text-primary">Event Details</h2>
+            <h2 className="text-xl font-semibold mb-2 text-primary">{t('eventDetailsTitle')}</h2>
             <p className="text-muted-foreground leading-relaxed">{event.description}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-semibold mb-2 flex items-center"><MapPin className="mr-2 h-5 w-5 text-primary" /> Location</h3>
+              <h3 className="text-lg font-semibold mb-2 flex items-center"><MapPin className="mr-2 h-5 w-5 text-primary" /> {t('locationTitle')}</h3>
               <p className="text-muted-foreground">{event.location.name}</p>
-              {/* Potentially add a small map here if lat/lng available */}
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="mr-2 h-5 w-5 text-primary" /> Event Type</h3>
+              <h3 className="text-lg font-semibold mb-2 flex items-center"><Tag className="mr-2 h-5 w-5 text-primary" /> {t('eventTypeTitle')}</h3>
               <p className="text-muted-foreground">{event.eventType}</p>
             </div>
             {event.organizer && (
               <div>
-                <h3 className="text-lg font-semibold mb-2 flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /> Organizer</h3>
+                <h3 className="text-lg font-semibold mb-2 flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /> {t('organizerTitle')}</h3>
                 <p className="text-muted-foreground">{event.organizer}</p>
               </div>
             )}
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-2 flex items-center"><CalendarDays className="mr-2 h-5 w-5 text-primary" /> Select Date & Time</h3>
+            <h3 className="text-lg font-semibold mb-2 flex items-center"><CalendarDays className="mr-2 h-5 w-5 text-primary" /> {t('selectDateTimeTitle')}</h3>
             <Select value={selectedEventDate} onValueChange={handleDateChange}>
               <SelectTrigger className="w-full md:w-1/2 bg-background text-foreground">
-                <SelectValue placeholder="Select a date and time" />
+                <SelectValue placeholder={t('selectDateTimePlaceholder')} />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
                 {event.dates.map((d) => (
                   <SelectItem key={`${d.date}|${d.time}`} value={`${d.date}|${d.time}`}>
-                    {new Date(d.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {d.time}
+                    {formatEventDisplayDate(d.date, d.time)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -156,10 +180,10 @@ export default function EventDetailPage() {
 
           {currentSelectedDateDetails?.rounds && currentSelectedDateDetails.rounds.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2 flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /> Select Round</h3>
+              <h3 className="text-lg font-semibold mb-2 flex items-center"><Clock className="mr-2 h-5 w-5 text-primary" /> {t('selectRoundTitle')}</h3>
               <Select value={selectedRound} onValueChange={setSelectedRound}>
                 <SelectTrigger className="w-full md:w-1/2 bg-background text-foreground">
-                  <SelectValue placeholder="Select a round" />
+                  <SelectValue placeholder={t('selectRoundPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent className="bg-popover text-popover-foreground">
                   {currentSelectedDateDetails.rounds.map((round) => (
@@ -179,10 +203,39 @@ export default function EventDetailPage() {
             onClick={handleProceedToSeats}
             disabled={!selectedEventDate || (!!currentSelectedDateDetails?.rounds?.length && !selectedRound)}
           >
-            Proceed to Select Seats
+            {t('proceedToSeatsButton')}
           </Button>
         </CardFooter>
       </Card>
     </div>
   );
+}
+
+// Add to messages.json for each language
+// "EventDetailPage": {
+//   ...
+//   "atTime": "at {time}" // For English
+// }
+// "EventDetailPage": {
+//   ...
+//   "atTime": "เวลา {time}" // For Thai
+// }
+
+const messages = {
+  en: {
+    EventDetailPage: {
+      atTime: "at {time}"
+    }
+  },
+  th: {
+    EventDetailPage: {
+      atTime: "เวลา {time}"
+    }
+  }
+};
+
+declare global {
+  interface IntlMessages {
+    EventDetailPage: typeof messages.en.EventDetailPage;
+  }
 }

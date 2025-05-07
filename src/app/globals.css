@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,6 +54,11 @@
     --chart-3: 30 90% 55%;
     --chart-4: 280 85% 60%;
     --chart-5: 340 85% 55%;
+
+    /* Font variables (Geist is already set up in layout) */
+    /* --font-geist-sans is provided by next/font */
+    /* --font-geist-mono is provided by next/font */
+    --font-sarabun: 'Sarabun', system-ui, sans-serif; /* explicit fallback for Sarabun variable */
   }
 
   .dark {
@@ -70,6 +76,11 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans; /* Use Tailwind's font-sans utility */
+  }
+
+  /* Apply Sarabun font if the lang attribute is 'th' */
+  html[lang="th"] body {
+    @apply font-sarabun; /* Use Tailwind's font-sarabun utility */
   }
 }

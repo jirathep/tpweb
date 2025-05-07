@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
+import { format as formatDateFns } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { enUS, th } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,7 +22,11 @@ interface DatePickerProps {
   placeholder?: string;
 }
 
-export function DatePicker({ date, setDate, buttonClassName, placeholder = "Pick a date" }: DatePickerProps) {
+export function DatePicker({ date, setDate, buttonClassName, placeholder }: DatePickerProps) {
+  const t = useTranslations('DatePicker');
+  const currentLocale = useLocale();
+  const datePickerLocale = currentLocale === 'th' ? th : enUS;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -33,7 +39,7 @@ export function DatePicker({ date, setDate, buttonClassName, placeholder = "Pick
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>{placeholder}</span>}
+          {date ? formatDateFns(date, "PPP", { locale: datePickerLocale }) : <span>{placeholder || t('placeholder')}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-card text-card-foreground">
@@ -42,6 +48,7 @@ export function DatePicker({ date, setDate, buttonClassName, placeholder = "Pick
           selected={date}
           onSelect={setDate}
           initialFocus
+          locale={datePickerLocale}
         />
       </PopoverContent>
     </Popover>

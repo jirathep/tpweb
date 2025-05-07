@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -6,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogIn, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next-intl/client';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
+  const t = useTranslations('LoginPage');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,22 +22,20 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call for login
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     if (username === 'member' && password === 'password') {
       toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
+        title: t('loginSuccessTitle'),
+        description: t('loginSuccessDescription'),
         variant: 'default',
         className: 'bg-green-500 text-white'
       });
-      // TODO: Implement actual session management/redirect
       router.push('/'); 
     } else {
       toast({
-        title: 'Login Failed',
-        description: 'Invalid username or password.',
+        title: t('loginFailedTitle'),
+        description: t('loginFailedDescription'),
         variant: 'destructive',
       });
     }
@@ -45,31 +46,31 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
       <Card className="w-full max-w-md bg-card text-card-foreground shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Member Login</CardTitle>
-          <CardDescription>Access your account to view bookings and manage your profile.</CardDescription>
+          <CardTitle className="text-2xl">{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('usernameLabel')}</Label>
               <Input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder={t('usernamePlaceholder')}
                 required
                 className="bg-background text-foreground"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder={t('passwordPlaceholder')}
                 required
                 className="bg-background text-foreground"
               />
@@ -82,10 +83,10 @@ export default function LoginPage() {
               ) : (
                 <LogIn className="mr-2 h-4 w-4" />
               )}
-              Login
+              {t('loginButton')}
             </Button>
              <p className="text-xs text-muted-foreground text-center">
-              Hint: Use username <code className="bg-muted px-1 py-0.5 rounded">member</code> and password <code className="bg-muted px-1 py-0.5 rounded">password</code> to login.
+              {t('loginHint')}
             </p>
           </CardFooter>
         </form>
