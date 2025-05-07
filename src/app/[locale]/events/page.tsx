@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ChangeEvent } from 'react';
@@ -5,10 +6,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from '@/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle as they are not used here for individual event cards
+import { Card, CardContent } from '@/components/ui/card'; 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, MapPinIcon, TagIcon, SearchIcon, FilterIcon, XIcon, Loader2, Ticket } from 'lucide-react';
+import { CalendarIcon, MapPinIcon, SearchIcon, XIcon, Loader2, Ticket } from 'lucide-react';
 import type { Event, EventCategory } from '@/lib/types';
 import { getEvents } from '@/services/event';
 import { DatePicker } from '@/components/ui/date-picker'; 
@@ -113,7 +114,6 @@ export default function EventListingPage() {
     
     const formatDate = (dateStr: string) => {
       try {
-        // Format as DD.MM.YYYY as shown in the image
         return formatDateFns(parseISO(dateStr), 'dd.MM.yyyy', { locale: getDateLocale() });
       } catch {
         return dateStr;
@@ -123,9 +123,6 @@ export default function EventListingPage() {
     const sortedDates = [...event.dates].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     if (sortedDates.length === 1) {
-      // If only one date, check if a time is relevant to display or just the date.
-      // For card list, usually just date or date range is enough.
-      // The image shows date or date range, not time for list items.
       return `${formatDate(sortedDates[0].date)}`;
     }
     
@@ -133,11 +130,9 @@ export default function EventListingPage() {
     const lastDate = formatDate(sortedDates[sortedDates.length - 1].date);
     
     if (firstDate === lastDate) {
-        // Multiple times on the same day, just show the date
         return firstDate;
     }
 
-    // Use a simple hyphen for date range as in image.
     return `${firstDate} - ${lastDate}`;
   };
   
@@ -170,7 +165,7 @@ export default function EventListingPage() {
                 placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 bg-input text-foreground border-border focus:border-primary" // Use bg-input for consistency
+                className="pl-10 bg-input text-foreground border-border focus:border-primary"
               />
             </div>
           </div>
@@ -179,14 +174,14 @@ export default function EventListingPage() {
             <DatePicker 
               date={selectedDate} 
               setDate={setSelectedDate} 
-              buttonClassName="w-full bg-input text-foreground border-border hover:border-primary focus:border-primary" // Use bg-input
+              buttonClassName="w-full bg-input text-foreground border-border hover:border-primary focus:border-primary"
               placeholder={t('DatePicker.placeholder')} 
             />
           </div>
           <div className="space-y-1">
             <label htmlFor="location" className="text-sm font-medium text-muted-foreground">{t('locationLabel')}</label>
             <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger id="location" className="w-full bg-input text-foreground border-border focus:border-primary"> {/* Use bg-input */}
+              <SelectTrigger id="location" className="w-full bg-input text-foreground border-border focus:border-primary">
                 <SelectValue placeholder={t('locationPlaceholder')} />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
@@ -202,7 +197,7 @@ export default function EventListingPage() {
           <div className="space-y-1">
             <label htmlFor="eventType" className="text-sm font-medium text-muted-foreground">{t('eventTypeLabel')}</label>
             <Select value={selectedEventType} onValueChange={(value) => setSelectedEventType(value as EventCategory)}>
-              <SelectTrigger id="eventType" className="w-full bg-input text-foreground border-border focus:border-primary"> {/* Use bg-input */}
+              <SelectTrigger id="eventType" className="w-full bg-input text-foreground border-border focus:border-primary">
                 <SelectValue placeholder={t('eventTypePlaceholder')} />
               </SelectTrigger>
               <SelectContent className="bg-popover text-popover-foreground">
@@ -226,22 +221,22 @@ export default function EventListingPage() {
 
       <section>
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[...Array(10)].map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            {[...Array(16)].map((_, i) => ( // Increased number of skeletons for smaller items
               <Card key={i} className="animate-pulse bg-card border-none shadow-lg rounded-lg">
                 <div className="aspect-[4/5] bg-muted/50 rounded-t-lg"></div>
-                <CardContent className="p-3 space-y-2">
+                <CardContent className="p-2 space-y-1.5"> {/* Reduced padding and space */}
                   <div className="h-3 w-1/3 bg-muted/50 rounded"></div> {/* Date placeholder */}
-                  <div className="h-4 w-3/4 bg-muted/50 rounded"></div> {/* Name placeholder line 1 */}
-                  <div className="h-4 w-1/2 bg-muted/50 rounded"></div> {/* Name placeholder line 2 */}
+                  <div className="h-3 w-3/4 bg-muted/50 rounded"></div> {/* Name placeholder line 1 (adjusted height) */}
+                  <div className="h-3 w-1/2 bg-muted/50 rounded"></div> {/* Name placeholder line 2 (adjusted height) */}
                   <div className="h-3 w-2/3 bg-muted/50 rounded"></div> {/* Location placeholder */}
-                  <div className="h-9 w-full bg-muted/50 rounded mt-2"></div> {/* Button placeholder */}
+                  <div className="h-9 w-full bg-muted/50 rounded mt-1.5"></div> {/* Button placeholder (h-9 is for sm button) */}
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : filteredEvents.length > 0 ? (
-           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             {filteredEvents.map((event) => (
               <Card key={event.id} className="overflow-hidden bg-card text-card-foreground border-transparent shadow-lg flex flex-col rounded-lg">
                 <Link href={`/events/${event.id}`} className="block group flex flex-col h-full">
@@ -250,33 +245,33 @@ export default function EventListingPage() {
                       src={event.imageUrl}
                       alt={event.name}
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 16vw, 12.5vw" // Adjusted sizes
                       className="object-cover rounded-t-lg"
                        data-ai-hint={`${event.eventType} event poster`}
                     />
                      {event.soldOut && (
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] bg-destructive/90 text-destructive-foreground text-center py-2 font-bold text-lg -rotate-[30deg] shadow-xl">
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[130%] bg-destructive/90 text-destructive-foreground text-center py-1 font-bold text-xs -rotate-[25deg] shadow-lg">
                           SOLD OUT
                         </div>
                       )}
                   </div>
-                  <CardContent className="p-3 flex flex-col flex-grow">
-                      <p className="text-xs text-primary font-semibold mb-1">{formatEventListDate(event)}</p>
-                      <h3 className="text-sm font-semibold text-card-foreground mb-1 leading-tight h-10 overflow-hidden group-hover:text-primary">
+                  <CardContent className="p-2 flex flex-col flex-grow">
+                      <p className="text-xs text-primary font-semibold mb-0.5">{formatEventListDate(event)}</p>
+                      <h3 className="text-xs font-semibold text-card-foreground mb-0.5 leading-tight h-8 overflow-hidden group-hover:text-primary">
                         {event.name}
                       </h3>
-                      <div className="flex items-center text-xs text-muted-foreground mb-3"> {/* items-center for vertical alignment */}
-                        <MapPinIcon className="h-3 w-3 mr-1.5 shrink-0" /> 
-                        <span className="line-clamp-1">{event.location.name || t('unnamedLocation')}</span> {/* Ensure single line for location */}
+                      <div className="flex items-center text-xs text-muted-foreground mb-2">
+                        <MapPinIcon className="h-2.5 w-2.5 mr-1 shrink-0" /> 
+                        <span className="line-clamp-1">{event.location.name || t('unnamedLocation')}</span>
                       </div>
                       <div className="mt-auto">
                         {event.soldOut ? (
-                          <Button variant="outline" className="w-full border-foreground/70 text-foreground/70 cursor-not-allowed hover:bg-transparent hover:border-foreground hover:text-foreground" disabled>
+                          <Button variant="outline" size="sm" className="w-full border-foreground/70 text-foreground/70 cursor-not-allowed hover:bg-transparent hover:border-foreground hover:text-foreground" disabled>
                             {tHome('soldOutButton')}
                           </Button>
                         ) : (
-                          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                             <Ticket className="mr-2 h-4 w-4" />
+                          <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                             <Ticket className="mr-1.5 h-3.5 w-3.5" />
                             {tHome('buyTicketsButton')}
                           </Button>
                         )}
@@ -287,8 +282,8 @@ export default function EventListingPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <FilterIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+          <div className="text-center py-12 col-span-full"> {/* Ensure this message spans all columns */}
+            <SearchIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" /> {/* Changed icon to Search for no filter results */}
             <h3 className="text-xl font-semibold text-foreground">{t('noEventsFoundTitle')}</h3>
             <p className="text-muted-foreground mt-2">{t('noEventsFoundDescription')}</p>
             {isLoading &&  <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary mt-4" />}
