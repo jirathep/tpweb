@@ -1,6 +1,9 @@
+
 import type { Metadata, Viewport } from 'next';
+// Import GeistSans and GeistMono directly as font objects
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+// Sarabun is a font loader function from next/font/google
 import { Sarabun } from 'next/font/google';
 import '../globals.css';
 import Navbar from '@/components/shared/Navbar';
@@ -11,14 +14,7 @@ import { NextIntlClientProvider, useMessages } from 'next-intl';
 import {notFound} from 'next/navigation';
 import {cn} from '@/lib/utils';
 
-const geistSans = GeistSans({
-  variable: '--font-geist-sans',
-});
-
-const geistMono = GeistMono({
-  variable: '--font-geist-mono',
-});
-
+// Sarabun is a loader function, call it to get the font object
 const sarabun = Sarabun({
   variable: '--font-sarabun',
   subsets: ['latin', 'thai'],
@@ -59,10 +55,10 @@ export default function RootLayout({
 
   return (
     <html lang={locale} className={cn(
-      geistSans.variable, 
-      geistMono.variable, 
-      sarabun.variable,
-      locale === 'th' ? sarabun.className : geistSans.className, // Apply Sarabun for Thai, Geist for others
+      GeistSans.variable, // Use imported GeistSans object directly
+      GeistMono.variable, // Use imported GeistMono object directly
+      sarabun.variable,   // This is the instance from calling Sarabun(...)
+      locale === 'th' ? sarabun.className : GeistSans.className, // Use Sarabun instance or imported GeistSans object
       'dark', 
       'antialiased'
       )}
@@ -85,3 +81,4 @@ export default function RootLayout({
     </html>
   );
 }
+
