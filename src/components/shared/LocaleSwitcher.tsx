@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentProps } from 'react';
-import { useState, useEffect } from 'react'; // Import useState and useEffect
+import { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/navigation';
 import {
@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue, // Import SelectValue
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -50,6 +50,10 @@ export default function LocaleSwitcher() {
     router.replace(pathname, { locale: nextLocale });
   };
 
+  // Tailwind classes for flag dimensions: w-5 (1.25rem), h-3.5 (0.875rem)
+  // Assuming 1rem = 16px, this is 20px width, 14px height.
+  const flagPlaceholderStyle = { display: 'inline-block', width: '1.25rem', height: '0.875rem' };
+
   return (
     <Select value={locale} onValueChange={onSelectChange}>
       <SelectTrigger
@@ -62,10 +66,11 @@ export default function LocaleSwitcher() {
             <span className="text-xs font-medium">{locale.toUpperCase()}</span>
           </>
         ) : (
-          // Render a static placeholder during SSR and initial client render
-          // This helps prevent hydration mismatch.
-          // Using a non-breaking space or a generic text until client is mounted.
-          <span className="text-xs font-medium">&nbsp;</span>
+          // Render static placeholders with consistent structure
+          <>
+            <span style={flagPlaceholderStyle} /> {/* Placeholder for flag */}
+            <span className="text-xs font-medium">&nbsp;</span> {/* Placeholder for text */}
+          </>
         )}
       </SelectTrigger>
       <SelectContent className="min-w-[8rem] bg-popover text-popover-foreground">
@@ -79,3 +84,4 @@ export default function LocaleSwitcher() {
     </Select>
   );
 }
+
