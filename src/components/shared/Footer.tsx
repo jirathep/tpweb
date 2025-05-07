@@ -17,12 +17,17 @@ const LineIcon = (props: ComponentProps<'svg'>) => (
 
 export default function Footer() {
   const t = useTranslations('Footer');
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
+    // Set mounted to true after the component mounts
+    // This ensures that operations depending on browser-specific APIs or
+    // values that might differ from SSR run only on the client post-hydration.
     setMounted(true);
+    // If we needed to update the year based on client's date, we could do it here,
+    // but new Date().getFullYear() is generally safe for SSR too.
+    // setCurrentYear(new Date().getFullYear()); 
   }, []);
 
   const footerLinks = [
@@ -63,11 +68,13 @@ export default function Footer() {
     },
   ];
 
-  // Prepare display values that depend on client-side state or resolution
-  const companyFullNameDisplay = mounted ? t('companyFullName') : ""; // Empty string for SSR/initial client render
-  const copyrightText = mounted && currentYear !== null 
-    ? t('copyright', { year: currentYear }) 
-    : t('copyright', { year: new Date().getFullYear() }); // Fallback for SSR/initial client
+  // companyFullNameDisplay should now be consistent between server and client initial render.
+  const companyFullNameDisplay = t('companyFullName'); 
+  
+  // copyrightText will use the year from SSR initially, and then update if needed (though unlikely for just year).
+  // The `mounted` check here is more for values that *must* come from the client, like Math.random().
+  // For `new Date().getFullYear()`, it's usually fine.
+  const copyrightText = t('copyright', { year: currentYear });
 
 
   return (
