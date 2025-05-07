@@ -11,6 +11,7 @@
   "Footer": {
     "copyright": "© {year} TICKETPROMPT. All rights reserved.",
     "companyTitle": "TICKETPROMPT",
+    "companyFullName": "TICKETPROMPT Co., Ltd.",
     "aboutUs": "About Us",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
@@ -238,4 +239,3 @@
     "goHome": "Go to Homepage"
   }
 }
-
