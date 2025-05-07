@@ -21,15 +21,14 @@ const ThaiFlagIcon = () => (
   </svg>
 );
 
-// Simplified SVG for USA Flag
-const UsaFlagIcon = () => (
- <svg width="20" height="14" viewBox="0 0 38 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rounded-sm">
-    <rect width="38" height="20" fill="#fff"/>
-    <path d="M0 0H38V2.5H0V0Z" fill="#BF0A30"/>
-    <path d="M0 5H38V7.5H0V5Z" fill="#BF0A30"/>
-    <path d="M0 10H38V12.5H0V10Z" fill="#BF0A30"/>
-    <path d="M0 15H38V17.5H0V15Z" fill="#BF0A30"/>
-    <rect width="16" height="10" fill="#002868"/>
+// Simplified SVG for UK (Union Jack) Flag
+const UkFlagIcon = () => (
+  <svg width="20" height="14" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rounded-sm">
+    <rect width="60" height="30" fill="#012169"/> {/* Blue background */}
+    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" strokeWidth="6"/> {/* St Andrew's Cross (white) */}
+    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4"/> {/* St Patrick's Cross (red, narrower) */}
+    <path d="M30,0 V30 M0,15 H60" stroke="#FFFFFF" strokeWidth="10"/> {/* St George's Cross (white) */}
+    <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6"/> {/* St George's Cross (red, narrower) */}
   </svg>
 );
 
@@ -47,12 +46,12 @@ export default function LocaleSwitcher() {
   return (
     <Select value={locale} onValueChange={onSelectChange}>
       <SelectTrigger className="w-auto bg-transparent border-none focus:ring-0 focus:ring-offset-0 text-foreground hover:bg-accent/10 px-2 py-1.5 h-auto" aria-label={t('label')}>
-        {locale === 'th' ? <ThaiFlagIcon /> : <UsaFlagIcon />}
+        {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
         {/* <SelectValue placeholder={t('label')} /> */}
       </SelectTrigger>
       <SelectContent className="min-w-[8rem] bg-popover text-popover-foreground">
         <SelectItem value="en" className="cursor-pointer flex items-center gap-2">
-          <UsaFlagIcon /> {t('en')}
+          <UkFlagIcon /> {t('en')}
         </SelectItem>
         <SelectItem value="th" className="cursor-pointer flex items-center gap-2">
           <ThaiFlagIcon /> {t('th')}
