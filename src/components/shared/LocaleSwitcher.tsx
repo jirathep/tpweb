@@ -1,10 +1,9 @@
-
 'use client';
 
 import type { ComponentProps } from 'react';
-import { useEffect, useState } from 'react';
+// Removed useState and useEffect as isClient is no longer needed for trigger content
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, usePathname } from '@/navigation'; 
+import { useRouter, usePathname } from '@/navigation';
 import {
   Select,
   SelectContent,
@@ -41,11 +40,6 @@ export default function LocaleSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const onSelectChange = (nextLocale: string) => {
     router.replace(pathname, { locale: nextLocale });
@@ -53,20 +47,17 @@ export default function LocaleSwitcher() {
 
   return (
     <Select value={locale} onValueChange={onSelectChange}>
-      <SelectTrigger 
-        className="w-auto bg-transparent border-none focus:ring-0 focus:ring-offset-0 text-foreground hover:bg-accent/10 px-2 py-1.5 h-auto flex items-center gap-1.5" 
+      <SelectTrigger
+        className="w-auto bg-transparent border-none focus:ring-0 focus:ring-offset-0 text-foreground hover:bg-accent/10 px-2 py-1.5 h-auto flex items-center gap-1.5"
         aria-label={t('label')}
       >
-        {isClient ? (
-          <>
-            {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
-            <span className="text-xs font-medium">{locale.toUpperCase()}</span>
-          </>
-        ) : (
-          // Placeholder for SSR and pre-hydration to prevent mismatch
-          // Using SelectValue ensures the trigger has some content, or provide a simple static placeholder
-          <SelectValue placeholder={t('label')} />
-        )}
+        {/* Always render the content based on current locale.
+            useLocale() is available on both server and client.
+            This ensures server and client initial renders match. */}
+        <>
+          {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
+          <span className="text-xs font-medium">{locale.toUpperCase()}</span>
+        </>
       </SelectTrigger>
       <SelectContent className="min-w-[8rem] bg-popover text-popover-foreground">
         <SelectItem value="en" className="cursor-pointer flex items-center gap-2 py-1.5">
@@ -79,4 +70,3 @@ export default function LocaleSwitcher() {
     </Select>
   );
 }
-
