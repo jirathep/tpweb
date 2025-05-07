@@ -2,7 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useRouter } from 'next-intl/client';
+import { useRouter } from '@/navigation'; // Use from '@/navigation' for locale-aware routing
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, ArrowLeft, Armchair, Loader2, Users, Info } from 'lucide-react';
@@ -305,3 +305,4 @@ export default function SelectSeatsPage() {
     </TooltipProvider>
   );
 }
+

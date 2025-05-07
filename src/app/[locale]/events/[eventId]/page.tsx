@@ -2,7 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation'; // Use from next/navigation for client components
-import { useRouter } from 'next-intl/client'; // Use from next-intl/client for locale-aware routing
+import { useRouter } from '@/navigation'; // Use from '@/navigation' for locale-aware routing
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -211,3 +211,4 @@ export default function EventDetailPage() {
     </div>
   );
 }
+

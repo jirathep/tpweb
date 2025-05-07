@@ -2,7 +2,7 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { useRouter } from 'next-intl/client';
+import { useRouter } from '@/navigation'; // Use from '@/navigation' for locale-aware routing
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Printer, TicketIcon, QrCodeIcon, Loader2, ArrowLeft } from 'lucide-react';
@@ -149,3 +149,4 @@ export default function TicketPage() {
     </div>
   );
 }
+

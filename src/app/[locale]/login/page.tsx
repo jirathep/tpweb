@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogIn, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next-intl/client';
+import { useRouter } from '@/navigation'; // Use from '@/navigation' for locale-aware routing
 import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
@@ -94,3 +94,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
