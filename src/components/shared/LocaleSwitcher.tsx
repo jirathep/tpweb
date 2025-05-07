@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentProps } from 'react';
-// Removed useState and useEffect as isClient is no longer needed for trigger content
+import { useState, useEffect } from 'react'; // Import useState and useEffect
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/navigation';
 import {
@@ -40,6 +40,11 @@ export default function LocaleSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const onSelectChange = (nextLocale: string) => {
     router.replace(pathname, { locale: nextLocale });
@@ -51,13 +56,17 @@ export default function LocaleSwitcher() {
         className="w-auto bg-transparent border-none focus:ring-0 focus:ring-offset-0 text-foreground hover:bg-accent/10 px-2 py-1.5 h-auto flex items-center gap-1.5"
         aria-label={t('label')}
       >
-        {/* Always render the content based on current locale.
-            useLocale() is available on both server and client.
-            This ensures server and client initial renders match. */}
-        <>
-          {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
-          <span className="text-xs font-medium">{locale.toUpperCase()}</span>
-        </>
+        {mounted ? (
+          <>
+            {locale === 'th' ? <ThaiFlagIcon /> : <UkFlagIcon />}
+            <span className="text-xs font-medium">{locale.toUpperCase()}</span>
+          </>
+        ) : (
+          // Render a static placeholder during SSR and initial client render
+          // This helps prevent hydration mismatch.
+          // Using a non-breaking space or a generic text until client is mounted.
+          <span className="text-xs font-medium">&nbsp;</span>
+        )}
       </SelectTrigger>
       <SelectContent className="min-w-[8rem] bg-popover text-popover-foreground">
         <SelectItem value="en" className="cursor-pointer flex items-center gap-2 py-1.5">
