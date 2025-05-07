@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { ArrowRight, Newspaper, MapPin, Ticket as TicketIconLucide } from 'lucide-react';
 import type { Event, NewsArticle, EventCategory } from '@/lib/types';
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 
 const EVENT_CATEGORIES: EventCategory[] = ['All', 'Concert', 'Performance', 'Sport', 'Exhibition', 'Conference'];
 const MAX_EVENTS_PER_TAB = 5;
+const MAX_OTHER_NEWS_ARTICLES = 3;
 
 
 export default function HomePage() {
@@ -35,7 +36,9 @@ export default function HomePage() {
         const events = await getEvents();
         setAllEvents(events);
         if (events.length > 0) {
-          setHighlightEvent(events[0]);
+          // Find first non-sold out event for highlight, or default to first if all are sold out
+          const availableEvent = events.find(e => !e.soldOut) || events[0];
+          setHighlightEvent(availableEvent);
         }
       } catch (error) {
         console.error("Failed to fetch events:", error);
@@ -81,6 +84,20 @@ export default function HomePage() {
     
     return t('eventDateRange', { startDate: firstDate, endDate: lastDate });
   };
+  
+  const formatNewsDate = (dateString: string) => {
+    try {
+      // Assuming news date might just be YYYY-MM-DD, add a default time if needed for consistent parsing
+      // Or if it includes time, parseISO should handle it.
+      // For the target format DD/MM/YYYY, HH:MM
+      const dateObj = parseISO(dateString); // Assuming dateString is ISO or easily parsable
+      return formatDateFns(dateObj, 'dd/MM/yyyy, HH:mm', { locale: getDateLocale() });
+    } catch (e) {
+      console.error("Error formatting news date:", dateString, e);
+      return dateString; // fallback
+    }
+  };
+
 
   const getCategoryKey = (category: EventCategory) => {
     switch (category) {
@@ -89,7 +106,8 @@ export default function HomePage() {
       case 'Performance': return 'performancesTab';
       case 'Sport': return 'sportsTab';
       case 'Exhibition': return 'exhibitionsTab';
-      case 'Conference': return 'performancesTab'; // Mapping conference to performance as per image
+      case 'Conference': return 'performancesTab'; 
+      case 'Other': return 'uncategorized';
       default: return 'allEventsTab';
     }
   };
@@ -97,18 +115,21 @@ export default function HomePage() {
   const filteredEvents = selectedTab === 'All'
     ? allEvents
     : allEvents.filter(event => {
-        if (selectedTab === 'Performance' && event.eventType === 'Conference') return true; // Map Conference to Performance tab
+        if (selectedTab === 'Performance' && event.eventType === 'Conference') return true;
         return event.eventType === selectedTab;
       });
 
   const displayedEvents = filteredEvents.slice(0, MAX_EVENTS_PER_TAB);
+
+  const featuredNewsArticle = newsArticles.length > 0 ? newsArticles[0] : null;
+  const otherNewsArticles = newsArticles.slice(1, MAX_OTHER_NEWS_ARTICLES + 1);
 
   return (
     <div className="space-y-12">
       {highlightEvent && (
         <section className="relative rounded-lg overflow-hidden shadow-2xl">
           <Link href={`/events/${highlightEvent.id}`} className="block group cursor-pointer">
-            <div className="relative w-full h-[400px] md:h-[500px]">
+            <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px]">
               <Image
                 src={highlightEvent.bannerUrl || highlightEvent.imageUrl}
                 alt={highlightEvent.name}
@@ -120,9 +141,9 @@ export default function HomePage() {
               />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:bg-black/50 transition-colors duration-300"></div>
-            <div className="absolute bottom-0 left-0 p-6 md:p-10 text-white">
-              <h1 className="text-3xl md:text-5xl font-bold mb-2 drop-shadow-lg">{highlightEvent.name}</h1>
-              <p className="text-lg md:text-xl mb-4 max-w-2xl drop-shadow-md">{highlightEvent.description.substring(0,150)}...</p>
+            <div className="absolute bottom-0 left-0 p-4 md:p-8 text-white">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 md:mb-2 drop-shadow-lg">{highlightEvent.name}</h1>
+              <p className="text-sm sm:text-base md:text-lg mb-2 md:mb-3 max-w-xl drop-shadow-md line-clamp-2 sm:line-clamp-3">{highlightEvent.description}</p>
             </div>
           </Link>
         </section>
@@ -135,14 +156,14 @@ export default function HomePage() {
             <h3 className="text-xl font-semibold text-muted-foreground">{t('newlyAddedEvents')}</h3>
           </div>
           <Tabs value={selectedTab} onValueChange={(value) => setSelectedTab(value as EventCategory)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 bg-transparent p-0">
-              {EVENT_CATEGORIES.filter(cat => cat !== 'Conference' && cat !== 'Other').map((category) => ( // Hide conference from tabs
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-5 bg-transparent p-0">
+              {EVENT_CATEGORIES.filter(cat => cat !== 'Conference' && cat !== 'Other').map((category) => (
                 <TabsTrigger
                   key={category}
                   value={category}
                   className={cn(
                     "pb-2 text-muted-foreground data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
-                     "text-sm md:text-base"
+                     "text-xs sm:text-sm md:text-base"
                   )}
                 >
                   {t(getCategoryKey(category))}
@@ -151,48 +172,61 @@ export default function HomePage() {
             </TabsList>
             <TabsContent value={selectedTab} className="mt-6">
               {isLoadingEvents ? (
-                <p className="text-muted-foreground">{t('noUpcomingEvents')}</p> // Placeholder for loading state
+                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {[...Array(MAX_EVENTS_PER_TAB)].map((_, i) => (
+                    <Card key={i} className="animate-pulse bg-card border-none shadow-lg rounded-lg">
+                        <div className="aspect-[4/5] bg-muted/50 rounded-t-lg"></div>
+                        <CardContent className="p-2 space-y-1.5">
+                        <div className="h-3 w-1/3 bg-muted/50 rounded"></div>
+                        <div className="h-3 w-3/4 bg-muted/50 rounded"></div>
+                        <div className="h-3 w-1/2 bg-muted/50 rounded"></div>
+                        <div className="h-3 w-2/3 bg-muted/50 rounded"></div>
+                        <div className="h-8 w-full bg-muted/50 rounded mt-1.5"></div>
+                        </CardContent>
+                    </Card>
+                    ))}
+                </div>
               ) : displayedEvents.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                   {displayedEvents.map((event) => (
-                    <Card key={event.id} className="overflow-hidden bg-card text-card-foreground border-none shadow-lg flex flex-col">
+                    <Card key={event.id} className="overflow-hidden bg-card text-card-foreground border-transparent shadow-lg flex flex-col rounded-lg">
                        <Link href={`/events/${event.id}`} className="block group flex flex-col h-full">
                         <div className="relative w-full aspect-[4/5]">
                           <Image
                             src={event.imageUrl}
                             alt={event.name}
                             fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                            className="object-cover rounded-t-md"
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+                            className="object-cover rounded-t-lg"
                             data-ai-hint={`${event.eventType} event`}
                           />
-                          {event.soldOut && (
-                            <div className="absolute top-1/2 left-0 right-0 bg-destructive/80 text-destructive-foreground text-center py-2 font-bold text-lg -rotate-12 transform -translate-y-1/2">
-                              SOLD OUT
+                           {event.soldOut && (
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[130%] bg-destructive/90 text-destructive-foreground text-center py-0.5 font-bold text-[0.6rem] -rotate-[25deg] shadow-lg">
+                                SOLD OUT
                             </div>
-                          )}
-                        </div>
-                        <CardContent className="p-3 flex flex-col flex-grow">
-                          <p className="text-xs text-primary font-semibold mb-1">{formatEventCardDate(event)}</p>
-                          <h3 className="text-sm font-semibold mb-1 leading-tight h-10 overflow-hidden group-hover:text-primary">
-                            {event.name}
-                          </h3>
-                          <div className="flex items-start text-xs text-muted-foreground mb-3">
-                            <MapPin className="h-3 w-3 mr-1 mt-0.5 shrink-0" /> 
-                            <span className="line-clamp-2">{event.location.name}</span>
-                          </div>
-                          <div className="mt-auto">
-                            {event.soldOut ? (
-                              <Button variant="outline" className="w-full border-foreground/50 text-foreground/70 cursor-not-allowed" disabled>
-                                {t('soldOutButton')}
-                              </Button>
-                            ) : (
-                              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                                <TicketIconLucide className="mr-2 h-4 w-4" />
-                                {t('buyTicketsButton')}
-                              </Button>
                             )}
-                          </div>
+                        </div>
+                        <CardContent className="p-2 flex flex-col flex-grow">
+                            <p className="text-[0.6rem] text-primary font-semibold mb-0.5">{formatEventCardDate(event)}</p>
+                            <h3 className="text-xs font-semibold text-card-foreground mb-0.5 leading-tight h-7 overflow-hidden group-hover:text-primary">
+                                {event.name}
+                            </h3>
+                            <div className="flex items-center text-[0.6rem] text-muted-foreground mb-1.5">
+                                <MapPin className="h-2.5 w-2.5 mr-0.5 shrink-0" /> 
+                                <span className="line-clamp-1">{event.location.name || t('unnamedLocation')}</span>
+                            </div>
+                            <div className="mt-auto">
+                                {event.soldOut ? (
+                                <Button variant="outline" size="sm" className="w-full h-8 text-xs border-foreground/70 text-foreground/70 cursor-not-allowed hover:bg-transparent hover:border-foreground hover:text-foreground" disabled>
+                                    {t('soldOutButton')}
+                                </Button>
+                                ) : (
+                                <Button size="sm" className="w-full h-8 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">
+                                    <TicketIconLucide className="mr-1 h-3 w-3" />
+                                    {t('buyTicketsButton')}
+                                </Button>
+                                )}
+                            </div>
                         </CardContent>
                       </Link>
                     </Card>
@@ -219,39 +253,65 @@ export default function HomePage() {
             <Newspaper className="mr-3 h-8 w-8 text-primary" />
             {t('latestNewsTitle')}
           </h2>
+          {newsArticles.length > 0 && (
+             <Button variant="link" asChild className="text-primary hover:text-primary/80">
+                <Link href="#"> {/* Replace # with actual news listing page if available */}
+                    {t('viewAllNews')} <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+             </Button>
+          )}
         </div>
         {newsArticles.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {newsArticles.map((article) => (
-            <Card key={article.id} className="flex flex-col md:flex-row overflow-hidden hover:shadow-xl transition-shadow duration-300 bg-card text-card-foreground">
-              {article.imageUrl && (
-                <div className="md:w-1/3 w-full h-48 md:h-auto relative">
-                   <Image
-                    src={article.imageUrl}
-                    alt={article.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover"
-                    data-ai-hint="news article"
-                  />
-                </div>
-              )}
-              <div className={`p-6 ${article.imageUrl ? 'md:w-2/3' : 'w-full'}`}>
-                <CardTitle className="text-lg mb-2">{article.title}</CardTitle>
-                <CardDescription className="text-xs text-muted-foreground mb-2">{article.date}</CardDescription>
-                <p className="text-sm text-muted-foreground mb-3">{article.summary}</p>
-                <Button variant="link" className="p-0 h-auto text-primary">
-                  {t('readMoreButton')} <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {featuredNewsArticle && (
+            <Link href="#" className="lg:col-span-2 block group relative rounded-lg overflow-hidden shadow-xl cursor-pointer min-h-[300px] sm:min-h-[400px]">
+              <Image
+                src={featuredNewsArticle.imageUrl || `https://picsum.photos/seed/${featuredNewsArticle.id}/800/600`}
+                alt={featuredNewsArticle.title}
+                fill
+                sizes="(max-width: 1023px) 100vw, 66vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                data-ai-hint="featured news"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-4 md:p-6 text-white">
+                <h3 className="text-lg md:text-xl font-bold mb-1 drop-shadow-md line-clamp-2">{featuredNewsArticle.title}</h3>
+                <p className="text-xs md:text-sm text-gray-300 drop-shadow-sm">{formatNewsDate(featuredNewsArticle.date)}</p>
               </div>
-            </Card>
-          ))}
+            </Link>
+          )}
+          
+          {otherNewsArticles.length > 0 && (
+            <div className="lg:col-span-1 space-y-4">
+              {otherNewsArticles.map((article) => (
+                <Link href="#" key={article.id} className="block group bg-card text-card-foreground rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                  <div className="flex">
+                    <div className="w-1/3 relative aspect-square">
+                       {article.imageUrl && (
+                        <Image
+                            src={article.imageUrl}
+                            alt={article.title}
+                            fill
+                            sizes="33vw"
+                            className="object-cover"
+                            data-ai-hint="news thumbnail"
+                        />
+                        )}
+                    </div>
+                    <div className="w-2/3 p-3 flex flex-col justify-center">
+                      <h4 className="text-xs sm:text-sm font-semibold text-card-foreground mb-1 leading-tight line-clamp-3 group-hover:text-primary">{article.title}</h4>
+                      <p className="text-[0.6rem] sm:text-xs text-muted-foreground">{formatNewsDate(article.date)}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
          ) : (
-          <p className="text-muted-foreground">{t('noNews')}</p>
+          <p className="text-muted-foreground text-center py-8">{t('noNews')}</p>
         )}
       </section>
     </div>
   );
 }
-

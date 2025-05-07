@@ -23,6 +23,7 @@
     "noNews": "No news articles available.",
     "detailsButton": "Details",
     "readMoreButton": "Read More",
+    "viewAllNews": "View All News",
     "popularEvents": "Popular Events",
     "newlyAddedEvents": "Newly Added Events",
     "allEventsTab": "All Shows",
@@ -52,7 +53,7 @@
     "noEventsFoundDescription": "Try adjusting your filters or check back later.",
     "viewDetails": "View Details",
     "unnamedLocation": "Unnamed Location",
-    "uncategorized": "Uncategorized",
+    "uncategorized": "Other",
     "atTime": "at {time}",
     "DatePicker": {
       "placeholder": "Pick a date"
@@ -186,4 +187,3 @@
     "goHome": "Go to Homepage"
   }
 }
-

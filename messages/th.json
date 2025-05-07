@@ -23,6 +23,7 @@
     "noNews": "ไม่มีข่าวสารในขณะนี้",
     "detailsButton": "รายละเอียด",
     "readMoreButton": "อ่านเพิ่มเติม",
+    "viewAllNews": "ดูข่าวทั้งหมด",
     "popularEvents": "อิเว้นต์ยอดนิยม",
     "newlyAddedEvents": "อิเว้นต์เร็วๆนี้",
     "allEventsTab": "งานแสดงทั้งหมด",
@@ -186,4 +187,3 @@
     "goHome": "ไปที่หน้าแรก"
   }
 }
-
