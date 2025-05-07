@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist_Sans as GeistSans, Geist_Mono as GeistMono } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import { Sarabun } from 'next/font/google';
 import '../globals.css';
 import Navbar from '@/components/shared/Navbar';
@@ -12,12 +13,10 @@ import {cn} from '@/lib/utils';
 
 const geistSans = GeistSans({
   variable: '--font-geist-sans',
-  subsets: ['latin'],
 });
 
 const geistMono = GeistMono({
   variable: '--font-geist-mono',
-  subsets: ['latin'],
 });
 
 const sarabun = Sarabun({
