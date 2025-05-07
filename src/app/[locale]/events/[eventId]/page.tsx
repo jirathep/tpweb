@@ -211,35 +211,3 @@ export default function EventDetailPage() {
     </div>
   );
 }
-
-// Add to messages.json for each language
-// "EventDetailPage": {
-//   ...
-//   "atTime": "at {time}" // For English
-// }
-// "EventDetailPage": {
-//   ...
-//   "atTime": "เวลา {time}" // For Thai
-// }
-
-// This is already declared in a global way by adding to interface IntlMessages
-// in the initial EventDetailPage. No need to redefine here.
-// const messages = {
-//   en: {
-//     EventDetailPage: {
-//       atTime: "at {time}"
-//     }
-//   },
-//   th: {
-//     EventDetailPage: {
-//       atTime: "เวลา {time}"
-//     }
-//   }
-// };
-
-// declare global {
-//   interface IntlMessages {
-//     EventDetailPage: typeof messages.en.EventDetailPage;
-//   }
-// }
-```
