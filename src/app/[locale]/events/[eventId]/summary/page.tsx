@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { AlertCircle, ArrowLeft, CreditCard, Smartphone, Info, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Info, CheckCircle, Loader2 } from 'lucide-react';
 import { useBooking } from '@/context/BookingContext';
 import type { UserInformation } from '@/lib/types';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -131,7 +131,7 @@ export default function SummaryPage() {
                 <ul className="list-disc list-inside space-y-1 text-sm bg-muted/20 p-3 rounded-md">
                   {bookingDetails.selectedSeats.map(seat => (
                     <li key={seat.seatId}>
-                      Zone {seat.zoneName}, Seat {seat.seatNumber} - ${seat.price.toFixed(2)}
+                      {t('seatDetailsItem', { zoneName: seat.zoneName, seatNumber: seat.seatNumber, price: seat.price.toFixed(2) })}
                     </li>
                   ))}
                 </ul>
