@@ -1,4 +1,4 @@
-import Link from 'next-link';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TicketIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';

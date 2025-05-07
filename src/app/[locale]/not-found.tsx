@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next-intl/link';
+import { Link } from '@/navigation'; // Updated import
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
@@ -43,3 +43,4 @@ export default function NotFoundPage() {
   }
 }
 */
+
