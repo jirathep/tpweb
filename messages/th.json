@@ -187,6 +187,7 @@
     "paymentSuccessfulTitle": "ชำระเงินสำเร็จ!",
     "paymentSuccessfulDescription": "การจองของคุณได้รับการยืนยันแล้ว กำลังเปลี่ยนเส้นทางไปยังตั๋วของคุณ...",
     "loadingBookingDetails": "กำลังโหลดรายละเอียดการจอง...",
+    "yourSeatLocationTitle": "ตำแหน่งที่นั่งของคุณ",
     "errors": {
       "firstNameRequired": "กรุณากรอกชื่อจริง",
       "lastNameRequired": "กรุณากรอกนามสกุล",

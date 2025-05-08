@@ -1,5 +1,6 @@
 
 'use client';
+import type { ComponentPropsWithoutRef } from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation'; // Use from '@/navigation' for locale-aware routing
@@ -8,9 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, CreditCard, Smartphone, Info, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Info, CheckCircle, Loader2, MapPin } from 'lucide-react';
 import { useBooking } from '@/context/BookingContext';
-import type { UserInformation } from '@/lib/types';
+import type { UserInformation, SeatingLayout } from '@/lib/types';
+import { getSeatingLayoutByEventId } from '@/services/event';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -20,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { format as formatDateFns, parseISO } from 'date-fns';
 import { enUS, th } from 'date-fns/locale';
+import SeatingMapPreview from '@/components/booking/SeatingMapPreview';
 
 export default function SummaryPage() {
   const params = useParams();
@@ -29,8 +32,11 @@ export default function SummaryPage() {
   const eventId = params.eventId as string;
   const { bookingDetails, setBookingDetails } = useBooking();
   const { toast } = useToast();
-  const [paymentMethod, setPaymentMethod] = useState<'Credit Card' | 'Prompt Pay' | undefined>(undefined);
+  const [paymentMethod, setPaymentMethod] = useState<'Credit Card' | 'Prompt Pay' | undefined>(bookingDetails?.paymentMethod || undefined);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [seatingLayout, setSeatingLayout] = useState<SeatingLayout | null>(null);
+  const [isLoadingLayout, setIsLoadingLayout] = useState(true);
+
 
   const UserInfoSchema = z.object({
     firstName: z.string().min(1, t('errors.firstNameRequired')),
@@ -52,7 +58,22 @@ export default function SummaryPage() {
   useEffect(() => {
     if (!bookingDetails || !bookingDetails.event || !bookingDetails.selectedEventDate || bookingDetails.selectedSeats.length === 0) {
       router.replace(`/events/${eventId}`);
+      return;
     }
+
+    setIsLoadingLayout(true);
+    getSeatingLayoutByEventId(bookingDetails.event.id)
+      .then(layout => {
+        setSeatingLayout(layout);
+      })
+      .catch(err => {
+        console.error("Failed to fetch seating layout for summary:", err);
+        // Optionally set an error state to display to user
+      })
+      .finally(() => {
+        setIsLoadingLayout(false);
+      });
+
   }, [bookingDetails, eventId, router]);
 
   const onSubmitUserInfo: SubmitHandler<UserInformation> = (data) => {
@@ -140,6 +161,22 @@ export default function SummaryPage() {
                 </p>
               </div>
             </section>
+
+            {isLoadingLayout ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : seatingLayout && bookingDetails.selectedSeats.length > 0 && (
+              <section>
+                 <hr className="border-border" />
+                <h3 className="text-xl font-semibold my-4 flex items-center">
+                    <MapPin className="mr-2 h-5 w-5 text-primary" />
+                    {t('yourSeatLocationTitle')}
+                </h3>
+                <SeatingMapPreview layout={seatingLayout} selectedSeats={bookingDetails.selectedSeats} />
+              </section>
+            )}
+
 
             <hr className="border-border" />
 

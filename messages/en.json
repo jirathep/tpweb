@@ -125,7 +125,7 @@
     "ticketStatusOffSale": "Off Sale",
     "ticketStatusUnavailable": "Unavailable",
     "noPriceInfo": "Price information not available",
-    "bookableShowDate": "Show Date" 
+    "bookableShowDate": "Show Date"
   },
   "SelectSeatsPage": {
     "backButton": "Back to Event Details",
@@ -187,6 +187,7 @@
     "paymentSuccessfulTitle": "Payment Successful!",
     "paymentSuccessfulDescription": "Your booking is confirmed. Redirecting to your ticket...",
     "loadingBookingDetails": "Loading booking details...",
+    "yourSeatLocationTitle": "Your Seat Location",
     "errors": {
       "firstNameRequired": "First name is required",
       "lastNameRequired": "Last name is required",
