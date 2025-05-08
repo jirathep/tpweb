@@ -23,6 +23,7 @@ const SELECTED_ZONE_COLOR = 0xff3b30; // Primary Red (used for zone box if it co
 const DEFAULT_ZONE_COLOR = 0xaaaaaa; // Light Grey
 const STAGE_COLOR = 0x333333;      // Dark Grey
 const SELECTED_SEAT_MODEL_COLOR = 0x22c55e; // Green for selected seat models
+const UNSELECTED_SEAT_MODEL_COLOR = 0x666666; // Gray for unselected/available seats
 
 // Seat model properties
 const SEAT_MODEL_SCALE_FACTOR = 0.6; // How much of the allocated "cell" a seat model takes up
@@ -124,9 +125,8 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
       zoneMesh.position.y = ZONE_BOX_HEIGHT / 2;
       venueGroup.add(zoneMesh);
 
-      // Add seat models if this zone has selected seats
-      const selectedSeatsInThisZone = selectedSeats.filter(s => s.zoneId === zoneData.id);
-      if (selectedSeatsInThisZone.length > 0 && zoneData.seats) {
+      // Add ALL seat models for this zone
+      if (zoneData.seats) {
         const numRows = zoneData.seats.length;
         const numCols = zoneData.seats[0]?.length || 1;
         
@@ -141,27 +141,28 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
           row.forEach((seat: Seat, colIndex: number) => {
             if (seat.aisle) return; // Skip aisle markers
 
-            const isThisSeatSelected = selectedSeatsInThisZone.find(ss => ss.seatId === seat.id);
-            if (isThisSeatSelected) {
-              const seatGeometry = new THREE.BoxGeometry(seatModelVisualWidth, seatModelVisualHeight, seatModelVisualDepth);
-              const seatMaterial = new THREE.MeshStandardMaterial({ 
-                color: SELECTED_SEAT_MODEL_COLOR, 
-                metalness: 0.1, 
-                roughness: 0.8 
-              });
-              const seatMesh = new THREE.Mesh(seatGeometry, seatMaterial);
+            const isThisSeatSelected = selectedSeats.find(ss => ss.zoneId === zoneData.id && ss.seatId === seat.id);
+            
+            const seatColor = isThisSeatSelected ? SELECTED_SEAT_MODEL_COLOR : UNSELECTED_SEAT_MODEL_COLOR;
+            
+            const seatGeometry = new THREE.BoxGeometry(seatModelVisualWidth, seatModelVisualHeight, seatModelVisualDepth);
+            const seatMaterial = new THREE.MeshStandardMaterial({ 
+              color: seatColor, 
+              metalness: 0.1, 
+              roughness: 0.8 
+            });
+            const seatMesh = new THREE.Mesh(seatGeometry, seatMaterial);
 
-              // Calculate position relative to the zone's center
-              const seatX_local = (colIndex + 0.5) * cellWidth - (zoneWidth3D / 2);
-              const seatZ_local = (rowIndex + 0.5) * cellDepth - (zoneDepth3D / 2);
-              
-              seatMesh.position.set(
-                zoneMesh.position.x + seatX_local,
-                zoneMesh.position.y + (ZONE_BOX_HEIGHT / 2) + (seatModelVisualHeight / 2), // Sit on top of zone box
-                zoneMesh.position.z + seatZ_local
-              );
-              venueGroup.add(seatMesh);
-            }
+            // Calculate position relative to the zone's center
+            const seatX_local = (colIndex + 0.5) * cellWidth - (zoneWidth3D / 2);
+            const seatZ_local = (rowIndex + 0.5) * cellDepth - (zoneDepth3D / 2);
+            
+            seatMesh.position.set(
+              zoneMesh.position.x + seatX_local,
+              zoneMesh.position.y + (ZONE_BOX_HEIGHT / 2) + (seatModelVisualHeight / 2), // Sit on top of zone box
+              zoneMesh.position.z + seatZ_local
+            );
+            venueGroup.add(seatMesh);
           });
         });
       }
@@ -209,7 +210,8 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
         controlsRef.current = null;
       }
     };
-  }, [layout, selectedSeats, selectedZoneIds]); // selectedZoneIds is derived from selectedSeats
+  }, [layout, selectedSeats, selectedZoneIds]); 
 
   return <div ref={mountRef} className={cn("w-full h-[300px] md:h-[400px] rounded-md overflow-hidden border border-border bg-muted/20", className)} data-ai-hint="3d venue map preview seats" />;
 }
+
