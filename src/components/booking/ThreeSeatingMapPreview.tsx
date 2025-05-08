@@ -29,10 +29,57 @@ const UNSELECTED_SEAT_MODEL_COLOR = 0x666666;
 const SEAT_MODEL_SCALE_FACTOR = 0.7; 
 const CHAIR_TOTAL_HEIGHT_SCALE = 1.5; 
 
+// Function to create text sprite
+function createTextSprite(text: string, config: { fontSize?: number; textColor?: string; fontFamily?: string; padding?: number; rectColor?: string, scaleToWidth?: number, scaleToHeight?: number }) {
+  const {
+    fontSize = 64, // Increased font size for better resolution on texture
+    textColor = 'rgba(255, 255, 255, 1)', // White text
+    fontFamily = 'Arial',
+    padding = 10,
+    rectColor = 'rgba(0, 0, 0, 0.0)', // Transparent background by default
+    scaleToWidth = 10, // Default width for the sprite in 3D scene
+    scaleToHeight = 2.5 // Default height for the sprite in 3D scene
+  } = config;
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+
+  context.font = `Bold ${fontSize}px ${fontFamily}`;
+  const textMetrics = context.measureText(text);
+  
+  canvas.width = textMetrics.width + padding * 2;
+  canvas.height = fontSize + padding * 2; // Adjusted for better vertical centering
+
+  // Background (optional)
+  context.fillStyle = rectColor;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Text
+  context.font = `Bold ${fontSize}px ${fontFamily}`; // Re-set font after canvas resize
+  context.fillStyle = textColor;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(material);
+  
+  // Scale sprite to desired dimensions in the scene
+  sprite.scale.set(scaleToWidth, scaleToHeight, 1);
+
+  return sprite;
+}
+
+
 export default function ThreeSeatingMapPreview({ layout, selectedSeats, className }: ThreeSeatingMapPreviewProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const stageMeshRef = useRef<THREE.Mesh | null>(null);
+  const stageTextSpriteRef = useRef<THREE.Sprite | null>(null);
 
 
   const selectedZoneIds = useMemo(() => new Set(selectedSeats.map(seat => seat.zoneId)), [selectedSeats]);
@@ -108,7 +155,25 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
       stageMesh.position.z = (parseFloat(top) / 100 + parseFloat(height) / 200) * MAP_PLANE_DEPTH - MAP_PLANE_DEPTH / 2;
       stageMesh.position.y = STAGE_BOX_HEIGHT / 2; 
       venueGroup.add(stageMesh);
-      stageMeshRef.current = stageMesh; // Store stage mesh reference
+      stageMeshRef.current = stageMesh;
+
+      // Add "STAGE" text sprite
+      const stageTextSprite = createTextSprite("STAGE", {
+        fontSize: 48, 
+        textColor: 'rgba(255,255,255,0.9)',
+        fontFamily: 'Geist, Arial, sans-serif',
+        scaleToWidth: stageWidth3D * 0.6, // Scale text relative to stage width
+        scaleToHeight: STAGE_BOX_HEIGHT * 0.8
+      });
+      if (stageTextSprite) {
+        stageTextSprite.position.set(
+          stageMesh.position.x,
+          stageMesh.position.y + STAGE_BOX_HEIGHT / 2 + 0.2, // Slightly above the stage
+          stageMesh.position.z
+        );
+        venueGroup.add(stageTextSprite);
+        stageTextSpriteRef.current = stageTextSprite;
+      }
     }
     
     // Zones and Chair Models
@@ -201,12 +266,9 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
               zoneMesh.position.z + chairZ_local
             );
 
-            if (stageMeshRef.current) {
-              // Ensure the chair's "front" (local +Z) faces the stage
-              const stagePositionTarget = new THREE.Vector3();
-              stageMeshRef.current.getWorldPosition(stagePositionTarget);
-              chairGroup.lookAt(stagePositionTarget);
-            }
+            // Orient chairs to face "north" (global -Z axis)
+            // Assuming chair model's front is local +Z: rotate PI around Y to face global -Z.
+            chairGroup.rotation.y = Math.PI; 
             
             venueGroup.add(chairGroup);
           });
@@ -239,6 +301,15 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
          currentMount.removeChild(renderer.domElement);
       }
       renderer.dispose();
+
+      if (stageTextSpriteRef.current) {
+        if (stageTextSpriteRef.current.material.map) {
+          stageTextSpriteRef.current.material.map.dispose();
+        }
+        stageTextSpriteRef.current.material.dispose();
+        stageTextSpriteRef.current = null;
+      }
+      
       scene.traverse(object => {
         if (object instanceof THREE.Mesh) {
           if (object.geometry) object.geometry.dispose();
@@ -249,20 +320,13 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
                 (object.material as THREE.Material).dispose();
              }
           }
+        } else if (object instanceof THREE.Sprite) {
+            if (object.material.map) object.material.map.dispose();
+            object.material.dispose();
         }
          if (object instanceof THREE.Group) {
-          object.children.forEach(child => {
-             if (child instanceof THREE.Mesh) {
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) {
-                   if (Array.isArray(child.material)) {
-                      child.material.forEach(material => material.dispose());
-                   } else if (child.material && typeof (child.material as THREE.Material).dispose === 'function') {
-                      (child.material as THREE.Material).dispose();
-                   }
-                }
-             }
-          });
+          // Groups themselves don't have geometry/material to dispose, 
+          // but their children are handled by the general traversal.
         }
       });
       if (controlsRef.current) {
