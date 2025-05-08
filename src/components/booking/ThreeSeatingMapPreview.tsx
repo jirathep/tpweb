@@ -15,8 +15,8 @@ interface ThreeSeatingMapPreviewProps {
 
 const MAP_PLANE_WIDTH = 60;
 const MAP_PLANE_DEPTH = 45; 
-const ZONE_BOX_HEIGHT = 0.5; // Reduced zone height to make chairs more prominent
-const STAGE_BOX_HEIGHT = 1.5; // Stage height, can be different from zone
+const ZONE_BOX_HEIGHT = 0.5; 
+const STAGE_BOX_HEIGHT = 1.5; 
 
 // Colors
 const SELECTED_ZONE_COLOR = 0xff3b30; 
@@ -26,12 +26,14 @@ const SELECTED_SEAT_MODEL_COLOR = 0x22c55e;
 const UNSELECTED_SEAT_MODEL_COLOR = 0x666666; 
 
 // Seat model properties
-const SEAT_MODEL_SCALE_FACTOR = 0.7; // How much of the allocated "cell" a seat model takes up
-const CHAIR_TOTAL_HEIGHT_SCALE = 1.5; // Overall height of the chair model relative to ZONE_BOX_HEIGHT
+const SEAT_MODEL_SCALE_FACTOR = 0.7; 
+const CHAIR_TOTAL_HEIGHT_SCALE = 1.5; 
 
 export default function ThreeSeatingMapPreview({ layout, selectedSeats, className }: ThreeSeatingMapPreviewProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const stageMeshRef = useRef<THREE.Mesh | null>(null);
+
 
   const selectedZoneIds = useMemo(() => new Set(selectedSeats.map(seat => seat.zoneId)), [selectedSeats]);
 
@@ -77,7 +79,7 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
     controls.minDistance = 10;
     controls.maxDistance = MAP_PLANE_WIDTH * 1.5;
     controls.maxPolarAngle = Math.PI / 2.05; 
-    controls.target.set(0, ZONE_BOX_HEIGHT, 0); // Target slightly above origin for better default view
+    controls.target.set(0, ZONE_BOX_HEIGHT, 0); 
     controlsRef.current = controls;
 
     // Venue Group (to center everything)
@@ -94,20 +96,19 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
       const stageMaterial = new THREE.MeshStandardMaterial({ color: STAGE_COLOR, metalness: 0.3, roughness: 0.6 });
       const stageMesh = new THREE.Mesh(stageGeometry, stageMaterial);
 
-      // Calculate stage position (centering logic might need adjustment based on specific 'left' values)
       let stagePosX = (parseFloat(left) / 100) * MAP_PLANE_WIDTH - MAP_PLANE_WIDTH / 2;
       if (left.endsWith('%') && parseFloat(left) !== 0 && parseFloat(left) !== 100) {
-         stagePosX += stageWidth3D / 2; // Adjust for percentage-based left positioning if not edge
-         if (left === '50%') stagePosX -= stageWidth3D /2; // specific correction if centered with 50%
-      } else if (!left.endsWith('%') && parseFloat(left) === 0 ) { // if left is '0' (not '0%')
+         stagePosX += stageWidth3D / 2;
+         if (left === '50%') stagePosX -= stageWidth3D /2; 
+      } else if (!left.endsWith('%') && parseFloat(left) === 0 ) {
          stagePosX += stageWidth3D / 2;
       }
 
-
       stageMesh.position.x = stagePosX;
       stageMesh.position.z = (parseFloat(top) / 100 + parseFloat(height) / 200) * MAP_PLANE_DEPTH - MAP_PLANE_DEPTH / 2;
-      stageMesh.position.y = STAGE_BOX_HEIGHT / 2; // Place bottom of stage at y=0
+      stageMesh.position.y = STAGE_BOX_HEIGHT / 2; 
       venueGroup.add(stageMesh);
+      stageMeshRef.current = stageMesh; // Store stage mesh reference
     }
     
     // Zones and Chair Models
@@ -124,14 +125,14 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
         metalness: 0.2,
         roughness: 0.7,
         transparent: true,
-        opacity: isSelectedZone ? 0.6 : 0.4 // Slightly more transparent
+        opacity: isSelectedZone ? 0.6 : 0.4 
       });
       const zoneGeometry = new THREE.BoxGeometry(zoneWidth3D, ZONE_BOX_HEIGHT, zoneDepth3D);
       const zoneMesh = new THREE.Mesh(zoneGeometry, zoneMaterial);
 
       zoneMesh.position.x = (parseFloat(left) / 100 + parseFloat(width) / 200) * MAP_PLANE_WIDTH - MAP_PLANE_WIDTH / 2;
       zoneMesh.position.z = (parseFloat(top) / 100 + parseFloat(height) / 200) * MAP_PLANE_DEPTH - MAP_PLANE_DEPTH / 2;
-      zoneMesh.position.y = ZONE_BOX_HEIGHT / 2; // Place bottom of zone at y=0
+      zoneMesh.position.y = ZONE_BOX_HEIGHT / 2; 
       venueGroup.add(zoneMesh);
 
       if (zoneData.seats) {
@@ -150,6 +151,8 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
         const seatBackHeight = chairTotalHeight * 0.65;
         const seatBackThickness = chairCellDepth * 0.15;
 
+        const legThickness = Math.min(chairCellWidth, chairCellDepth) * 0.08;
+        const legHeightActual = seatBaseHeight * 0.9; // Height of the leg itself
 
         zoneData.seats.forEach((row: Seat[], rowIndex: number) => {
           row.forEach((seat: Seat, colIndex: number) => {
@@ -159,30 +162,52 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
             const chairColor = isThisSeatSelected ? SELECTED_SEAT_MODEL_COLOR : UNSELECTED_SEAT_MODEL_COLOR;
             
             const chairGroup = new THREE.Group();
+            const seatMaterial = new THREE.MeshStandardMaterial({ color: chairColor, metalness: 0.1, roughness: 0.8 });
 
             // Seat Base
             const seatBaseGeo = new THREE.BoxGeometry(chairCellWidth, seatBaseHeight, chairCellDepth);
-            const seatMaterial = new THREE.MeshStandardMaterial({ color: chairColor, metalness: 0.1, roughness: 0.8 });
             const seatBaseMesh = new THREE.Mesh(seatBaseGeo, seatMaterial);
-            seatBaseMesh.position.y = seatBaseHeight / 2; // Relative to chairGroup origin
+            seatBaseMesh.position.y = legHeightActual + seatBaseHeight / 2;
             chairGroup.add(seatBaseMesh);
 
             // Seat Back
             const seatBackGeo = new THREE.BoxGeometry(chairCellWidth, seatBackHeight, seatBackThickness);
             const seatBackMesh = new THREE.Mesh(seatBackGeo, seatMaterial);
-            seatBackMesh.position.y = seatBaseHeight + (seatBackHeight / 2); // Position on top of base
-            seatBackMesh.position.z = -(chairCellDepth / 2) + (seatBackThickness / 2); // Position at the back of the base
+            seatBackMesh.position.y = legHeightActual + seatBaseHeight + seatBackHeight / 2;
+            seatBackMesh.position.z = -(chairCellDepth / 2) + (seatBackThickness / 2);
             chairGroup.add(seatBackMesh);
             
-            // Calculate position relative to the zone's center, then add zone's world position
+            // Legs
+            const legGeo = new THREE.BoxGeometry(legThickness, legHeightActual, legThickness);
+            const legPositions = [
+              { x: -chairCellWidth / 2 + legThickness / 2, z: chairCellDepth / 2 - legThickness / 2 }, // Front-left
+              { x: chairCellWidth / 2 - legThickness / 2, z: chairCellDepth / 2 - legThickness / 2 },  // Front-right
+              { x: -chairCellWidth / 2 + legThickness / 2, z: -chairCellDepth / 2 + legThickness / 2 },// Back-left
+              { x: chairCellWidth / 2 - legThickness / 2, z: -chairCellDepth / 2 + legThickness / 2 }  // Back-right
+            ];
+
+            legPositions.forEach(pos => {
+              const legMesh = new THREE.Mesh(legGeo, seatMaterial); // Use same material for legs
+              legMesh.position.set(pos.x, legHeightActual / 2, pos.z);
+              chairGroup.add(legMesh);
+            });
+            
             const chairX_local = (colIndex + 0.5) * cellWidth - (zoneWidth3D / 2);
             const chairZ_local = (rowIndex + 0.5) * cellDepth - (zoneDepth3D / 2);
             
             chairGroup.position.set(
               zoneMesh.position.x + chairX_local,
-              zoneMesh.position.y + (ZONE_BOX_HEIGHT / 2), // Bottom of chair base sits on top of zone box
+              zoneMesh.position.y + (ZONE_BOX_HEIGHT / 2), // Place bottom of legs on zone surface
               zoneMesh.position.z + chairZ_local
             );
+
+            if (stageMeshRef.current) {
+              // Ensure the chair's "front" (local +Z) faces the stage
+              const stagePositionTarget = new THREE.Vector3();
+              stageMeshRef.current.getWorldPosition(stagePositionTarget);
+              chairGroup.lookAt(stagePositionTarget);
+            }
+            
             venueGroup.add(chairGroup);
           });
         });
@@ -226,7 +251,6 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
           }
         }
          if (object instanceof THREE.Group) {
-          // Dispose children of groups as well
           object.children.forEach(child => {
              if (child instanceof THREE.Mesh) {
                 if (child.geometry) child.geometry.dispose();
@@ -245,9 +269,8 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
         controlsRef.current.dispose();
         controlsRef.current = null;
       }
+      stageMeshRef.current = null;
     };
-  // IMPORTANT: Add selectedZoneIds to dependency array if zone appearance depends on it directly (e.g. color)
-  // and that appearance is determined in this useEffect.
   }, [layout, selectedSeats, selectedZoneIds]); 
 
 
