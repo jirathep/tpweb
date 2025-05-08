@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useRouter } from '@/navigation'; // Use from '@/navigation' for locale-aware routing
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, ArrowLeft, Armchair, Loader2, Users, Info } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Armchair, Loader2, Users, Info, X } from 'lucide-react';
 import type { SeatingLayout, Zone, Seat, SelectedSeatInfo } from '@/lib/types';
 import { getSeatingLayoutByEventId } from '@/services/event';
 import { useBooking } from '@/context/BookingContext';
@@ -95,19 +95,6 @@ export default function SelectSeatsPage() {
       totalPrice: calculateTotalPrice(),
     });
     router.push(`/events/${eventId}/summary`);
-  };
-
-  const getSeatColor = (seat: Seat) => {
-    const isSelected = localSelectedSeats.some(s => s.zoneId === selectedZone?.id && s.seatId === seat.id);
-    if (isSelected) return 'bg-primary text-primary-foreground';
-    if (seat.status === 'unavailable' || seat.status === 'locked') return 'bg-muted text-muted-foreground cursor-not-allowed';
-    
-    switch (seat.priceTier) {
-      case 'premium': return 'bg-yellow-400 hover:bg-yellow-500 text-black';
-      case 'standard': return 'bg-green-500 hover:bg-green-600 text-white';
-      case 'economy': return 'bg-blue-500 hover:bg-blue-600 text-white';
-      default: return 'bg-accent hover:bg-accent/80 text-accent-foreground';
-    }
   };
 
   const getDateLocale = () => {
@@ -231,11 +218,26 @@ export default function SelectSeatsPage() {
             </div>
               <div className="mt-4 space-y-2">
                 <h4 className="text-md font-semibold">{t('legendTitle')}</h4>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-yellow-400"></div><span>{t('legendPremium')}</span></div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-green-500"></div><span>{t('legendStandard')}</span></div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-blue-500"></div><span>{t('legendEconomy')}</span></div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-primary"></div><span>{t('legendSelected')}</span></div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-muted"></div><span>{t('legendUnavailable')}</span></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center bg-yellow-400 text-black"><Armchair className="w-4 h-4" /></div>
+                  <span>{t('legendPremium')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center bg-green-500 text-white"><Armchair className="w-4 h-4" /></div>
+                  <span>{t('legendStandard')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center bg-blue-500 text-white"><Armchair className="w-4 h-4" /></div>
+                  <span>{t('legendEconomy')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center bg-primary text-primary-foreground"><Armchair className="w-4 h-4" /></div>
+                  <span>{t('legendSelected')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center bg-muted text-muted-foreground"><X className="w-4 h-4 text-destructive" /></div>
+                  <span>{t('legendUnavailable')}</span>
+                </div>
               </div>
           </div>
 
@@ -247,31 +249,53 @@ export default function SelectSeatsPage() {
                   <div className="inline-block min-w-full">
                   {selectedZone.seats.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex justify-center mb-1 space-x-1">
-                      {row.map(seat => (
-                        <Tooltip key={seat.id} delayDuration={100}>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleSeatClick(seat, selectedZone)}
-                              className={cn(
-                                "w-8 h-8 flex items-center justify-center rounded text-xs font-medium transition-colors",
-                                getSeatColor(seat),
-                                seat.aisle ? "opacity-0 pointer-events-none" : ""
-                              )}
-                              disabled={seat.status === 'unavailable' || seat.status === 'locked' || (localSelectedSeats.length >= MAX_SEATS_SELECTABLE && !localSelectedSeats.some(s => s.zoneId === selectedZone?.id && s.seatId === seat.id))}
-                              aria-label={t('seatTooltipSeat', {seatNumber: seat.seatNumber}) + `, ` + t('seatTooltipPrice', {price: seat.price.toFixed(2)}) + `, ` + t('seatTooltipStatus', {status: getSeatStatusText(localSelectedSeats.some(s => s.zoneId === selectedZone?.id && s.seatId === seat.id) ? 'selected' : seat.status)})}
-                            >
-                              <Armchair className="w-4 h-4" />
-                            </button>
-                          </TooltipTrigger>
-                          {!seat.aisle && (
-                            <TooltipContent className="bg-popover text-popover-foreground">
-                              <p>{t('seatTooltipSeat', {seatNumber: seat.seatNumber})}</p>
-                              <p>{t('seatTooltipPrice', {price: seat.price.toFixed(2)})}</p>
-                              <p>{t('seatTooltipStatus', {status: getSeatStatusText(localSelectedSeats.some(s => s.zoneId === selectedZone?.id && s.seatId === seat.id) ? 'selected' : seat.status)})}</p>
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
-                      ))}
+                      {row.map(seat => {
+                        const isSelected = localSelectedSeats.some(s => s.zoneId === selectedZone?.id && s.seatId === seat.id);
+                        let seatButtonStyles = "";
+                        let iconToRender;
+
+                        if (isSelected) {
+                          seatButtonStyles = "bg-primary text-primary-foreground";
+                          iconToRender = <Armchair className="w-4 h-4" />;
+                        } else if (seat.status === 'unavailable' || seat.status === 'locked') {
+                          seatButtonStyles = "bg-muted text-muted-foreground cursor-not-allowed";
+                          iconToRender = <X className="w-4 h-4 text-destructive" />;
+                        } else { // Available
+                          switch (seat.priceTier) {
+                            case 'premium': seatButtonStyles = 'bg-yellow-400 hover:bg-yellow-500 text-black'; break;
+                            case 'standard': seatButtonStyles = 'bg-green-500 hover:bg-green-600 text-white'; break;
+                            case 'economy': seatButtonStyles = 'bg-blue-500 hover:bg-blue-600 text-white'; break;
+                            default: seatButtonStyles = 'bg-accent hover:bg-accent/80 text-accent-foreground'; break;
+                          }
+                          iconToRender = <Armchair className="w-4 h-4" />;
+                        }
+
+                        return (
+                          <Tooltip key={seat.id} delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => handleSeatClick(seat, selectedZone)}
+                                className={cn(
+                                  "w-8 h-8 flex items-center justify-center rounded text-xs font-medium transition-colors",
+                                  seatButtonStyles,
+                                  seat.aisle ? "opacity-0 pointer-events-none" : ""
+                                )}
+                                disabled={seat.status === 'unavailable' || seat.status === 'locked' || (localSelectedSeats.length >= MAX_SEATS_SELECTABLE && !isSelected)}
+                                aria-label={t('seatTooltipSeat', {seatNumber: seat.seatNumber}) + `, ` + t('seatTooltipPrice', {price: seat.price.toFixed(2)}) + `, ` + t('seatTooltipStatus', {status: getSeatStatusText(isSelected ? 'selected' : seat.status)})}
+                              >
+                                {iconToRender}
+                              </button>
+                            </TooltipTrigger>
+                            {!seat.aisle && (
+                              <TooltipContent className="bg-popover text-popover-foreground">
+                                <p>{t('seatTooltipSeat', {seatNumber: seat.seatNumber})}</p>
+                                <p>{t('seatTooltipPrice', {price: seat.price.toFixed(2)})}</p>
+                                <p>{t('seatTooltipStatus', {status: getSeatStatusText(isSelected ? 'selected' : seat.status)})}</p>
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                        );
+                      })}
                     </div>
                   ))}
                   </div>
