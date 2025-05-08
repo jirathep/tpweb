@@ -28,6 +28,7 @@ const UNSELECTED_SEAT_MODEL_COLOR = 0x666666;
 // Seat model properties
 const SEAT_MODEL_SCALE_FACTOR = 0.7; 
 const CHAIR_TOTAL_HEIGHT_SCALE = 1.5; 
+const SEAT_BASE_DEPTH_FACTOR = 0.75; // New factor to adjust seat base depth (length)
 
 // Function to create text sprite
 function createTextSprite(text: string, config: { fontSize?: number; textColor?: string; fontFamily?: string; padding?: number; rectColor?: string, scaleToWidth?: number, scaleToHeight?: number }) {
@@ -209,15 +210,17 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
 
         // Chair model dimensions
         const chairCellWidth = cellWidth * SEAT_MODEL_SCALE_FACTOR;
-        const chairCellDepth = cellDepth * SEAT_MODEL_SCALE_FACTOR;
-        const chairTotalHeight = ZONE_BOX_HEIGHT * CHAIR_TOTAL_HEIGHT_SCALE;
+        const chairCellDepthScaled = cellDepth * SEAT_MODEL_SCALE_FACTOR; // Max depth for chair
+        
+        const actualSeatBaseDepth = chairCellDepthScaled * SEAT_BASE_DEPTH_FACTOR; // Reduced depth for the seat base
 
+        const chairTotalHeight = ZONE_BOX_HEIGHT * CHAIR_TOTAL_HEIGHT_SCALE;
         const seatBaseHeight = chairTotalHeight * 0.35;
         const seatBackHeight = chairTotalHeight * 0.65;
-        const seatBackThickness = chairCellDepth * 0.15;
+        const seatBackThickness = actualSeatBaseDepth * 0.15; // Make back thickness relative to new base depth
 
-        const legThickness = Math.min(chairCellWidth, chairCellDepth) * 0.08;
-        const legHeightActual = seatBaseHeight * 0.9; // Height of the leg itself
+        const legThickness = Math.min(chairCellWidth, actualSeatBaseDepth) * 0.08;
+        const legHeightActual = seatBaseHeight * 0.9; 
 
         zoneData.seats.forEach((row: Seat[], rowIndex: number) => {
           row.forEach((seat: Seat, colIndex: number) => {
@@ -230,7 +233,7 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
             const seatMaterial = new THREE.MeshStandardMaterial({ color: chairColor, metalness: 0.1, roughness: 0.8 });
 
             // Seat Base
-            const seatBaseGeo = new THREE.BoxGeometry(chairCellWidth, seatBaseHeight, chairCellDepth);
+            const seatBaseGeo = new THREE.BoxGeometry(chairCellWidth, seatBaseHeight, actualSeatBaseDepth);
             const seatBaseMesh = new THREE.Mesh(seatBaseGeo, seatMaterial);
             seatBaseMesh.position.y = legHeightActual + seatBaseHeight / 2;
             chairGroup.add(seatBaseMesh);
@@ -239,20 +242,20 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
             const seatBackGeo = new THREE.BoxGeometry(chairCellWidth, seatBackHeight, seatBackThickness);
             const seatBackMesh = new THREE.Mesh(seatBackGeo, seatMaterial);
             seatBackMesh.position.y = legHeightActual + seatBaseHeight + seatBackHeight / 2;
-            seatBackMesh.position.z = -(chairCellDepth / 2) + (seatBackThickness / 2);
+            seatBackMesh.position.z = -(actualSeatBaseDepth / 2) + (seatBackThickness / 2); // Adjusted for new base depth
             chairGroup.add(seatBackMesh);
             
             // Legs
             const legGeo = new THREE.BoxGeometry(legThickness, legHeightActual, legThickness);
             const legPositions = [
-              { x: -chairCellWidth / 2 + legThickness / 2, z: chairCellDepth / 2 - legThickness / 2 }, // Front-left
-              { x: chairCellWidth / 2 - legThickness / 2, z: chairCellDepth / 2 - legThickness / 2 },  // Front-right
-              { x: -chairCellWidth / 2 + legThickness / 2, z: -chairCellDepth / 2 + legThickness / 2 },// Back-left
-              { x: chairCellWidth / 2 - legThickness / 2, z: -chairCellDepth / 2 + legThickness / 2 }  // Back-right
+              { x: -chairCellWidth / 2 + legThickness / 2, z: actualSeatBaseDepth / 2 - legThickness / 2 }, // Front-left
+              { x: chairCellWidth / 2 - legThickness / 2, z: actualSeatBaseDepth / 2 - legThickness / 2 },  // Front-right
+              { x: -chairCellWidth / 2 + legThickness / 2, z: -actualSeatBaseDepth / 2 + legThickness / 2 },// Back-left
+              { x: chairCellWidth / 2 - legThickness / 2, z: -actualSeatBaseDepth / 2 + legThickness / 2 }  // Back-right
             ];
 
             legPositions.forEach(pos => {
-              const legMesh = new THREE.Mesh(legGeo, seatMaterial); // Use same material for legs
+              const legMesh = new THREE.Mesh(legGeo, seatMaterial); 
               legMesh.position.set(pos.x, legHeightActual / 2, pos.z);
               chairGroup.add(legMesh);
             });
@@ -262,12 +265,10 @@ export default function ThreeSeatingMapPreview({ layout, selectedSeats, classNam
             
             chairGroup.position.set(
               zoneMesh.position.x + chairX_local,
-              zoneMesh.position.y + (ZONE_BOX_HEIGHT / 2), // Place bottom of legs on zone surface
+              zoneMesh.position.y + (ZONE_BOX_HEIGHT / 2), 
               zoneMesh.position.z + chairZ_local
             );
-
-            // Orient chairs to face "north" (global -Z axis)
-            // Assuming chair model's front is local +Z: rotate PI around Y to face global -Z.
+            
             chairGroup.rotation.y = Math.PI; 
             
             venueGroup.add(chairGroup);
