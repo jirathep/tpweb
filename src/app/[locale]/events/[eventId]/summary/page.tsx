@@ -22,7 +22,8 @@ import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import { format as formatDateFns, parseISO } from 'date-fns';
 import { enUS, th } from 'date-fns/locale';
-import SeatingMapPreview from '@/components/booking/SeatingMapPreview';
+// import SeatingMapPreview from '@/components/booking/SeatingMapPreview'; // Old component
+import ThreeSeatingMapPreview from '@/components/booking/ThreeSeatingMapPreview'; // New 3D component
 
 export default function SummaryPage() {
   const params = useParams();
@@ -163,7 +164,7 @@ export default function SummaryPage() {
             </section>
 
             {isLoadingLayout ? (
-              <div className="flex justify-center items-center py-8">
+              <div className="flex justify-center items-center py-8 min-h-[300px] md:min-h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : seatingLayout && bookingDetails.selectedSeats.length > 0 && (
@@ -173,7 +174,7 @@ export default function SummaryPage() {
                     <MapPin className="mr-2 h-5 w-5 text-primary" />
                     {t('yourSeatLocationTitle')}
                 </h3>
-                <SeatingMapPreview layout={seatingLayout} selectedSeats={bookingDetails.selectedSeats} />
+                <ThreeSeatingMapPreview layout={seatingLayout} selectedSeats={bookingDetails.selectedSeats} />
               </section>
             )}
 
@@ -273,4 +274,3 @@ export default function SummaryPage() {
     </div>
   );
 }
-
