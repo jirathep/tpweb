@@ -19,7 +19,7 @@ const mockEvents: Event[] = [
     tags: ['Rock', 'Live Music', 'Stadium'],
     organizer: 'LiveNation',
     soldOut: false,
-    priceRangeDisplay: ['VIP Package: 5,000 THB - 7,500 THB', 'Regular: 2,500 THB - 4,000 THB', 'Economy: 1,500 THB'],
+    priceRangeDisplay: ['Gold Circle: ~7000 THB', 'AL/AR Standing: ~6000 THB', 'VIP Seated: ~5500 THB', 'B Standing: ~4000 THB', 'Standard Seated: ~3000-3500 THB', 'Economy Seated: ~2000 THB'],
     ticketStatus: 'on_sale',
   },
   {
@@ -169,24 +169,59 @@ const generateSeats = (rows: number, seatsPerRow: number, basePrice: number, pri
   return seats;
 };
 
+const concert123Layout: SeatingLayout = {
+  eventId: 'concert-123',
+  stagePosition: { top: '10%', left: '50%', width: '35%', height: '10%' }, // Centered stage
+  zones: [
+    // Free Standing (represented with 1x1 "seat" for selection purposes)
+    { id: 'gold-circle', name: 'Gold Circle', seats: generateSeats(1, 1, 6500, 'premium'), mapPosition: { top: '22%', left: '42.5%', width: '15%', height: '8%' } },
+    { id: 'al-standing', name: 'AL Free Standing', seats: generateSeats(1, 1, 5500, 'premium'), mapPosition: { top: '32%', left: '25%', width: '24%', height: '15%' } },
+    { id: 'ar-standing', name: 'AR Free Standing', seats: generateSeats(1, 1, 5500, 'premium'), mapPosition: { top: '32%', left: '51%', width: '24%', height: '15%' } },
+    { id: 'b-standing', name: 'B Free Standing', seats: generateSeats(1, 1, 4000, 'standard'), mapPosition: { top: '50%', left: '25%', width: '50%', height: '20%' } },
+
+    // West Stand (Ground Level)
+    { id: 'w1', name: 'W1', seats: generateSeats(8, 10, 3000, 'standard'), mapPosition: { top: '73%', left: '5%', width: '15%', height: '10%' } },
+    { id: 'w2', name: 'W2', seats: generateSeats(8, 10, 3000, 'standard'), mapPosition: { top: '63%', left: '5%', width: '15%', height: '10%' } },
+    { id: 'w3-vip4', name: 'W3 (VIP4)', seats: generateSeats(8, 10, 5000, 'premium'), mapPosition: { top: '53%', left: '5%', width: '15%', height: '10%' } },
+    { id: 'w4', name: 'W4', seats: generateSeats(8, 10, 3000, 'standard'), mapPosition: { top: '43%', left: '5%', width: '15%', height: '10%' } },
+    { id: 'w5', name: 'W5', seats: generateSeats(8, 10, 3000, 'standard'), mapPosition: { top: '33%', left: '5%', width: '15%', height: '10%' } },
+    { id: 'w6-vip3', name: 'W6 (VIP3)', seats: generateSeats(8, 10, 5000, 'premium'), mapPosition: { top: '23%', left: '5%', width: '15%', height: '10%' } },
+    { id: 'w7-vip3', name: 'W7 (VIP3)', seats: generateSeats(8, 10, 5000, 'premium'), mapPosition: { top: '13%', left: '5%', width: '15%', height: '10%' } },
+
+    // West Stand (2nd Floor) - Positioned to the far left to distinguish
+    { id: 'ww1', name: 'WW1', seats: generateSeats(10, 8, 2200, 'economy'), mapPosition: { top: '75%', left: '0.5%', width: '4%', height: '18%' } },
+    { id: 'ww2', name: 'WW2', seats: generateSeats(10, 8, 2200, 'economy'), mapPosition: { top: '57%', left: '0.5%', width: '4%', height: '18%' } },
+    { id: 'ww3', name: 'WW3', seats: generateSeats(10, 8, 2200, 'economy'), mapPosition: { top: '39%', left: '0.5%', width: '4%', height: '18%' } },
+    { id: 'ww4', name: 'WW4', seats: generateSeats(10, 8, 2200, 'economy'), mapPosition: { top: '21%', left: '0.5%', width: '4%', height: '18%' } },
+    { id: 'ww5', name: 'WW5', seats: generateSeats(10, 8, 2200, 'economy'), mapPosition: { top: '3%', left: '0.5%', width: '4%', height: '18%' } },
+    
+    // East Stand
+    { id: 'e2-vip3', name: 'E2 (VIP3)', seats: generateSeats(8, 10, 5000, 'premium'), mapPosition: { top: '13%', left: '80%', width: '15%', height: '10%' } },
+    { id: 'e3', name: 'E3', seats: generateSeats(10, 12, 3000, 'standard'), mapPosition: { top: '23%', left: '80%', width: '15%', height: '20%' } },
+    { id: 'e4-vip4', name: 'E4 (VIP4)', seats: generateSeats(10, 12, 5000, 'premium'), mapPosition: { top: '43%', left: '80%', width: '15%', height: '20%' } },
+
+    // South Stand
+    { id: 's1', name: 'S1', seats: generateSeats(6, 8, 3000, 'standard'), mapPosition: { top: '65%', left: '85%', width: '10%', height: '10%' } }, // Smaller due to curve
+    { id: 's2', name: 'S2', seats: generateSeats(6, 8, 3000, 'standard'), mapPosition: { top: '75%', left: '80%', width: '10%', height: '10%' } }, // Smaller due to curve
+    { id: 's3-vip', name: 'S3 (VIP South)', seats: generateSeats(8, 12, 5000, 'premium'), mapPosition: { top: '85%', left: '67.5%', width: '12.5%', height: '10%' } },
+    { id: 's4', name: 'S4', seats: generateSeats(8, 12, 3000, 'standard'), mapPosition: { top: '85%', left: '50%', width: '15%', height: '10%' } },
+    { id: 's5', name: 'S5', seats: generateSeats(8, 12, 3000, 'standard'), mapPosition: { top: '85%', left: '32.5%', width: '15%', height: '10%' } },
+    { id: 's6', name: 'S6', seats: generateSeats(8, 12, 3000, 'standard'), mapPosition: { top: '85%', left: '15%', width: '15%', height: '10%' } },
+  ]
+};
+
+
 const mockSeatingLayouts: SeatingLayout[] = [
-  {
-    eventId: 'concert-123', // Rock Legends Live
-    stagePosition: { top: '5%', left: '50%', width: '40%', height: '10%'},
-    zones: [
-      { id: 'floor-a', name: 'Floor A', seats: generateSeats(5, 15, 5000, 'premium'), mapPosition: { top: '20%', left: '35%', width: '30%', height: '20%' } },
-      { id: 'sec-101', name: 'Section 101', seats: generateSeats(10, 20, 3500, 'standard'), mapPosition: { top: '45%', left: '10%', width: '25%', height: '30%' } },
-      { id: 'sec-102', name: 'Section 102', seats: generateSeats(10, 20, 3500, 'standard'), mapPosition: { top: '45%', left: '65%', width: '25%', height: '30%' } },
-      { id: 'balcony-201', name: 'Balcony 201', seats: generateSeats(8, 25, 2000, 'economy'), mapPosition: { top: '80%', left: '20%', width: '60%', height: '15%' } },
-    ],
-  },
+  concert123Layout, // Use the detailed layout for concert-123
   {
     eventId: 'sports-456', // Lakers vs Celtics
-    stagePosition: { top: '45%', left: '50%', width: '40%', height: '10%'}, // Center court
+    stagePosition: { top: '45%', left: '50%', width: '0%', height: '0%'}, // Center court often doesn't have a "stage" platform
     zones: [
-      { id: 'courtside', name: 'Courtside', seats: generateSeats(3, 20, 15000, 'premium'), mapPosition: { top: '35%', left: '20%', width: '60%', height: '10%' } },
-      { id: 'lower-100s', name: 'Lower 100s', seats: generateSeats(15, 25, 6000, 'standard'), mapPosition: { top: '20%', left: '10%', width: '80%', height: '30%' } },
-      { id: 'upper-300s', name: 'Upper 300s', seats: generateSeats(20, 30, 2500, 'economy'), mapPosition: { top: '60%', left: '5%', width: '90%', height: '35%' } },
+      { id: 'courtside', name: 'Courtside', seats: generateSeats(3, 20, 15000, 'premium'), mapPosition: { top: '40%', left: '15%', width: '70%', height: '20%' } }, // Around the court
+      { id: 'lower-100s', name: 'Lower 100s', seats: generateSeats(15, 25, 6000, 'standard'), mapPosition: { top: '20%', left: '10%', width: '80%', height: '25%' } },
+      { id: 'lower-100s-sides', name: 'Lower 100s Sides', seats: generateSeats(15, 10, 5800, 'standard'), mapPosition: { top: '20%', left: '0%', width: '10%', height: '60%' } },
+      { id: 'lower-100s-sides-2', name: 'Lower 100s Sides 2', seats: generateSeats(15, 10, 5800, 'standard'), mapPosition: { top: '20%', left: '90%', width: '10%', height: '60%' } },
+      { id: 'upper-300s', name: 'Upper 300s', seats: generateSeats(20, 30, 2500, 'economy'), mapPosition: { top: '65%', left: '5%', width: '90%', height: '30%' } },
     ],
   },
    {
