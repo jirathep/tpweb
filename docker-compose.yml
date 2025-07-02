@@ -6,11 +6,13 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: prompt-eticket-app
+    volumes:
+      - ./:/app
     ports:
-      - "9002:3000"
+      - "9002:9002"
     environment:
       - NODE_ENV=production
       # Add any other environment variables your app needs for production here
       # Example:
       # - SOME_API_KEY=your_production_key
-    restart: unless-stopped
+    #restart: unless-stopped
